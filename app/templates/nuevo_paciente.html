@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nuevo Paciente</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="/static/js/darkmode.js"></script>
+
+    <script>
+        if (!localStorage.getItem("token")) {
+            window.location.href = "/login";
+        }
+    </script>
+</head>
+
+<body class="container mt-4">
+
+    <!-- 🔙 Volver -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="/" class="btn btn-outline-secondary">← Volver</a>
+
+        <div class="d-flex gap-2">
+            <button onclick="logout()" class="btn btn-danger">Salir</button>
+
+            <button class="btn btn-sm btn-secondary" onclick="toggleDarkMode()">
+                🌙
+            </button>
+        </div>
+    </div>
+
+    <h2 class="mb-4">Nuevo Paciente</h2>
+
+    <div class="card shadow-sm p-4 border-0">
+
+        <!-- 🧍 DATOS PERSONALES -->
+        <h5 class="mb-3">Datos personales</h5>
+
+        <div class="row">
+            <div class="col-md-6">
+                <input id="nombre" class="form-control mb-2" placeholder="Nombre">
+            </div>
+            <div class="col-md-6">
+                <input id="apellido" class="form-control mb-2" placeholder="Apellido">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <input id="dni" class="form-control mb-2" placeholder="DNI">
+            </div>
+            <div class="col-md-4">
+                <input id="fecha" type="date" class="form-control mb-2">
+            </div>
+            <div class="col-md-4">
+                <input id="telefono" class="form-control mb-2" placeholder="Teléfono">
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- 🏥 OBRA SOCIAL -->
+        <h5 class="mb-3">Obra social</h5>
+
+        <div class="row">
+            <div class="col-md-6">
+                <input id="obra_social" class="form-control mb-2" placeholder="Obra social">
+            </div>
+            <div class="col-md-6">
+                <input id="numero_afiliado" class="form-control mb-2" placeholder="Número afiliado">
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- 🩸 DATOS MÉDICOS -->
+        <h5 class="mb-3">Datos médicos</h5>
+
+        <textarea id="sangrados" class="form-control mb-2" placeholder="Sangrados"></textarea>
+        <textarea id="trombosis" class="form-control mb-2" placeholder="Trombosis"></textarea>
+        <textarea id="alergias" class="form-control mb-2" placeholder="Alergias"></textarea>
+        <textarea id="vacunas" class="form-control mb-2" placeholder="Vacunas"></textarea>
+        <textarea id="gestas" class="form-control mb-2" placeholder="Gestas"></textarea>
+
+        <input id="medico_cabecera" class="form-control mb-2" placeholder="Médico de cabecera">
+
+        <textarea id="fim_descriptivo" class="form-control mb-3" placeholder="FIM descriptivo"></textarea>
+
+        <div class="text-end">
+            <button class="btn btn-success px-4" onclick="crearPaciente()">
+                Guardar paciente
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+            aplicarModo();
+        });
+
+        function logout() {
+            localStorage.removeItem("token");
+            window.location.href = "/login";
+        }
+
+
+        async function crearPaciente() {
+
+            const paciente = {
+                nombre: document.getElementById("nombre").value,
+                apellido: document.getElementById("apellido").value,
+                dni: document.getElementById("dni").value,
+                fecha_nacimiento: document.getElementById("fecha").value,
+                telefono: document.getElementById("telefono").value,
+
+                obra_social: document.getElementById("obra_social").value,
+                numero_afiliado: document.getElementById("numero_afiliado").value,
+
+                sangrados: document.getElementById("sangrados").value,
+                trombosis: document.getElementById("trombosis").value,
+                alergias: document.getElementById("alergias").value,
+                vacunas: document.getElementById("vacunas").value,
+                gestas: document.getElementById("gestas").value,
+                medico_cabecera: document.getElementById("medico_cabecera").value,
+                fim_descriptivo: document.getElementById("fim_descriptivo").value
+            };
+
+            const res = await fetch("/pacientes", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + localStorage.getItem("token")
+                },
+                body: JSON.stringify(paciente)
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.detail || "Error ❌");
+                return;
+            }
+
+            alert("Paciente creado correctamente ✅");
+
+            window.location.href = "/";
+        }
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+# Entorno virtual
+venv/
+__pycache__/
+*.pyc
+
+# Base de datos local (¡No queremos subir tus pacientes de prueba!)
+*.db
+app/med.db
+
+# Variables de entorno
+.env
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db

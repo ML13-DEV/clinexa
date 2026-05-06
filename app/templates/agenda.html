@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Agenda</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/static/css/styles.css">
+
+    <script src="/static/js/darkmode.js"></script>
+
+    <script>
+        if (!localStorage.getItem("token")) {
+            window.location.href = "/login";
+        }
+    </script>
+</head>
+
+<body class="container mt-4">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- 🔙 NAV -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="/" class="btn btn-outline-secondary">← Volver</a>
+
+        <div class="d-flex gap-2">
+            <button onclick="logout()" class="btn btn-danger">Salir</button>
+
+            <button class="btn btn-sm btn-secondary" onclick="toggleDarkMode()">
+                🌙
+            </button>
+        </div>
+    </div>
+
+    <h2>Agenda</h2>
+
+    <!-- 📅 CONTROL FECHA -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <button class="btn btn-outline-primary" onclick="cambiarDia(-1)">⬅</button>
+        
+        <h4 id="fechaAgenda"></h4>
+        
+        <button class="btn btn-outline-primary" onclick="cambiarDia(1)">➡</button>
+    </div>
+
+    <div class="card p-3 mb-3">
+        <h5>Nuevo Turno</h5>
+
+        <input id="nuevo_nombre" class="form-control mb-2" placeholder="Nombre paciente (opcional)">
+
+        <select id="nuevo_paciente" class="form-control mb-2">
+            <option value="">Seleccionar paciente existente</option>
+        </select>
+
+        <input id="nuevo_fecha" type="datetime-local" class="form-control mb-2">
+
+        <input id="nuevo_motivo" class="form-control mb-2" placeholder="Motivo">
+
+        <button class="btn btn-primary" onclick="crearTurnoAgenda()">Crear turno</button>
+    </div>
+
+    <!-- 📋 TURNOS -->
+    <div id="agendaTurnos"></div>
+
+
+    <div class="modal fade" id="modalTurno" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Turno</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <input id="edit_fecha" type="datetime-local" class="form-control mb-2">
+
+                <input id="edit_motivo" class="form-control mb-2" placeholder="Motivo">
+
+                <select id="edit_estado" class="form-control">
+                    <option value="pendiente">Pendiente</option>
+                    <option value="atendido">Atendido</option>
+                </select>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-success btn-sm"
+                onclick="event.stopPropagation(); guardarTurnoInline(${id})">Guardar</button>
+            </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+        let fechaActual = new Date();
+        fechaActual.setHours(0,0,0,0);
+        let turnoEditando = null;
+
+        function logout() {
+            localStorage.removeItem("token");
+            window.location.href = "/login";
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            aplicarModo();
+            cargarAgenda();
+            cargarPacientesSelect();
+        });
+
+        // =========================
+        // 🕒 FORMATEO
+        // =========================
+
+        function formatearHora(fecha) {
+            return new Date(fecha).toLocaleTimeString("es-AR", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false
+            });
+        }
+
+        function formatearFechaISO(fecha) {
+            return fecha.toISOString().split("T")[0];
+        }
+
+        // =========================
+        // 📅 CARGAR AGENDA
+        // =========================
+
+        async function cargarAgenda() {
+
+            const fechaISO = formatearFechaISO(fechaActual);
+
+            const res = await fetch(`/turnos/fecha?fecha=${fechaISO}`, {
+                headers: {
+                    "Authorization": "Bearer " + localStorage.getItem("token")
+                }
+            });
+            const data = await res.json();
+
+            document.getElementById("fechaAgenda").innerText =
+                fechaActual.toLocaleDateString("es-AR", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long"
+                });
+
+            const contenedor = document.getElementById("agendaTurnos");
+            contenedor.innerHTML = "";
+
+            if (data.length === 0) {
+                contenedor.innerHTML = `<div class="text-center text-muted">No hay turnos</div>`;
+                return;
+            }
+
+            data.forEach(t => {
+
+                const nombre = t.paciente
+                    ? `${t.paciente.nombre} ${t.paciente.apellido}`
+                    : (t.nombre_temp || "Sin paciente");
+
+                const div = document.createElement("div");
+                div.className = "agenda-item";
+
+                div.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <strong>${formatearHora(t.fecha)}</strong><br>
+                            ${t.paciente ? `${t.paciente.nombre} ${t.paciente.apellido}` : (t.nombre_temp || "Sin paciente")}
+                        </div>
+
+                        <div class="d-flex gap-2">
+
+                            ${
+                                t.estado === "pendiente"
+                                ? `<span class="badge bg-warning text-dark">Pendiente</span>`
+                                : `<span class="badge bg-success">Atendido</span>`
+                            }
+
+                            <button class="btn btn-sm btn-outline-primary"
+                                onclick="event.stopPropagation(); editarTurnoInline(this, ${t.id}, '${t.fecha}', '${t.motivo}', '${t.estado}', '${t.diagnostico || ""}', '${t.observaciones || ""}')">
+                                ✏️
+                            </button>
+
+                            <button class="btn btn-sm btn-outline-danger"
+                                onclick="event.stopPropagation(); eliminarTurno(${t.id})">
+                                🗑
+                            </button>
+
+                        </div>
+
+                    </div>
+                `;
+
+                div.onclick = (e) => {
+
+                    // 🔥 SI el click fue en input, botón, select → NO navegar
+                    if (
+                        e.target.tagName === "INPUT" ||
+                        e.target.tagName === "BUTTON" ||
+                        e.target.tagName === "SELECT"
+                    ) return;
+
+                    if (t.paciente_id) {
+                        window.location.href = `/paciente/${t.paciente_id}`;
+                    }
+                };
+                contenedor.appendChild(div);
+            });
+        }
+
+        // =========================
+        // 📅 CAMBIAR DÍA
+        // =========================
+
+        function cambiarDia(dias) {
+            fechaActual.setDate(fechaActual.getDate() + dias);
+            cargarAgenda();
+        }
+
+        // =========================
+        // ✏️ EDITAR
+        // =========================
+
+        function mostrarToast(msg, tipo="success") {
+
+            const toast = document.createElement("div");
+            toast.className = `position-fixed bottom-0 end-0 m-3 p-3 text-white bg-${tipo}`;
+            toast.style.zIndex = 9999;
+            toast.innerText = msg;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 2500);
+        }
+
+        async function crearTurnoAgenda() {
+
+            const fecha = document.getElementById("nuevo_fecha").value;
+            const motivo = document.getElementById("nuevo_motivo").value;
+            const paciente = document.getElementById("nuevo_paciente").value;
+            const nombre = document.getElementById("nuevo_nombre").value;
+
+            console.log("CLICK CREAR TURNO");
+
+            const data = {
+                fecha: fecha,
+                motivo: motivo,
+                paciente_id: paciente || null,
+                nombre_temp: nombre || null
+            };
+
+            const res = await fetch("/turnos", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + localStorage.getItem("token")
+                },
+                body: JSON.stringify(data)
+            });
+
+            console.log("STATUS:", res.status);
+
+            if (!res.ok) {
+                mostrarToast("Error ❌", "danger");
+                return;
+            }
+
+            // 🔥 limpiar
+            document.getElementById("nuevo_fecha").value = "";
+            document.getElementById("nuevo_motivo").value = "";
+            document.getElementById("nuevo_paciente").value = "";
+            document.getElementById("nuevo_nombre").value = "";
+
+            // 🔥 CLAVE
+            fechaActual = new Date(fecha);
+            fechaActual.setHours(0,0,0,0);
+
+            await cargarAgenda();
+
+            mostrarToast("Turno creado ✅");
+        }
+
+        function abrirModalEditar(id, fecha, motivo, estado) {
+
+            turnoEditando = id;
+
+            document.getElementById("edit_fecha").value = fecha.slice(0,16);
+            document.getElementById("edit_motivo").value = motivo;
+            document.getElementById("edit_estado").value = estado;
+
+            new bootstrap.Modal(document.getElementById("modalTurno")).show();
+        }
+
+        async function guardarTurno() {
+
+            const data = {
+                fecha: document.getElementById("edit_fecha").value,
+                motivo: document.getElementById("edit_motivo").value,
+                estado: document.getElementById("edit_estado").value
+            };
+
+            const res = await fetch(`/turnos/${turnoEditando}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + localStorage.getItem("token")
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!res.ok) {
+                mostrarToast("Error ❌", "danger");
+                return;
+            }
+
+            bootstrap.Modal.getInstance(document.getElementById("modalTurno")).hide();
+            mostrarToast("Actualizado ✔");
+            cargarAgenda();
+        }
+
+        // =========================
+        // 🩺 ATENDER TURNO
+        // =========================
+
+        function mostrarFormularioAtender(btn, id) {
+
+            const contenedor = btn.closest(".agenda-item");
+
+            if (contenedor.querySelector(".form-atender")) return;
+
+            const div = document.createElement("div");
+            div.className = "form-atender mt-2";
+
+            div.innerHTML = `
+                <input id="diag-${id}" class="form-control mb-1" placeholder="Diagnóstico">
+                <input id="obs-${id}" class="form-control mb-1" placeholder="Observaciones">
+
+                <button class="btn btn-success btn-sm" onclick="guardarAtencion(${id})">Guardar</button>
+                <button class="btn btn-secondary btn-sm" onclick="this.parentElement.remove()">Cancelar</button>
+            `;
+
+            contenedor.appendChild(div);
+        }
+
+        async function guardarAtencion(id) {
+
+            const diagnostico = document.getElementById(`diag-${id}`).value;
+            const observaciones = document.getElementById(`obs-${id}`).value;
+
+            const res = await fetch(`/turnos/${id}/atender`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + localStorage.getItem("token")
+                },
+                body: JSON.stringify({ diagnostico, observaciones })
+            });
+
+            if (!res.ok) {
+                mostrarToast("Error ❌", "danger");
+                return;
+            }
+
+            mostrarToast("Turno atendido ✔");
+            cargarAgenda();
+        }
+
+        // =========================
+        // 🗑 ELIMINAR (con modal)
+        // =========================
+
+        function confirmarAccion(mensaje, callback) {
+
+            const modal = document.createElement("div");
+
+            modal.innerHTML = `
+                <div class="modal fade" id="modalConfirm" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+
+                            <div class="modal-body text-center">
+                                <p>${mensaje}</p>
+
+                                <button class="btn btn-danger" id="btnConfirmar">Confirmar</button>
+                                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            const bsModal = new bootstrap.Modal(document.getElementById("modalConfirm"));
+            bsModal.show();
+
+            document.getElementById("btnConfirmar").onclick = () => {
+                callback();
+                bsModal.hide();
+            };
+
+            document.getElementById("modalConfirm").addEventListener("hidden.bs.modal", () => {
+                modal.remove();
+            });
+        }
+
+        async function eliminarTurno(id) {
+
+            confirmarAccion("¿Eliminar turno?", async () => {
+
+                const res = await fetch(`/turnos/${id}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": "Bearer " + localStorage.getItem("token")
+                    }
+                });
+
+                if (!res.ok) {
+                    mostrarToast("Error ❌", "danger");
+                    return;
+                }
+
+                mostrarToast("Eliminado 🗑");
+                cargarAgenda();
+            });
+        }
+
+        function editarTurnoInline(btn, id, fecha, motivo, estado, diagnostico, observaciones) {
+
+            const contenedor = btn.closest(".agenda-item");
+
+            // evitar duplicados
+            if (contenedor.querySelector(".edit-form")) return;
+
+            const div = document.createElement("div");
+            div.className = "edit-form mt-2";
+
+            div.onclick = (e) => e.stopPropagation();
+
+
+            div.innerHTML = `
+                <input type="datetime-local" class="form-control mb-1" id="f-${id}" value="${fecha.slice(0,16)}">
+                <input class="form-control mb-1" id="m-${id}" placeholder="Motivo" value="${motivo}">
+                
+                <select class="form-control mb-1" id="e-${id}">
+                    <option value="pendiente" ${estado==="pendiente"?"selected":""}>Pendiente</option>
+                    <option value="atendido" ${estado==="atendido"?"selected":""}>Atendido</option>
+                </select>
+
+                <input class="form-control mb-1" id="d-${id}" placeholder="Diagnóstico" value="${diagnostico}">
+                <input class="form-control mb-1" id="o-${id}" placeholder="Observaciones" value="${observaciones}">
+
+                <button class="btn btn-success btn-sm" onclick="guardarTurnoInline(${id})">Guardar</button>
+                <button class="btn btn-secondary btn-sm" onclick="this.parentElement.remove()">Cancelar</button>
+            `;
+            
+
+            contenedor.appendChild(div);
+        }
+
+        async function guardarTurnoInline(id) {
+
+            const data = {
+                fecha: document.getElementById(`f-${id}`).value,
+                motivo: document.getElementById(`m-${id}`).value,
+                estado: document.getElementById(`e-${id}`).value,
+                diagnostico: document.getElementById(`d-${id}`).value,
+                observaciones: document.getElementById(`o-${id}`).value
+            };
+
+            try {
+                const res = await fetch(`/turnos/${id}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + localStorage.getItem("token")
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    console.error(err);
+                    mostrarToast("Error al guardar ❌", "danger");
+                    return;
+                }
+
+                // 🔥 cerrar el form antes de recargar
+                document.querySelector(`#f-${id}`).closest(".edit-form").remove();
+
+                mostrarToast("Actualizado ✔");
+
+                // 🔥 recargar agenda sin refrescar página
+                await cargarAgenda();
+
+            } catch (error) {
+                console.error(error);
+                mostrarToast("Error inesperado ❌", "danger");
+            }
+        }
+
+        async function cargarPacientesSelect() {
+            const res = await fetch("/pacientes", {
+                headers: {
+                    "Authorization": "Bearer " + localStorage.getItem("token")
+                }
+            });
+            const data = await res.json();
+
+            const select = document.getElementById("nuevo_paciente");
+
+            data.forEach(p => {
+                const option = document.createElement("option");
+                option.value = p.id;
+                option.textContent = `${p.nombre} ${p.apellido}`;
+                select.appendChild(option);
+            });
+        }
+
+        async function crearTurnoAgenda() {
+
+            const fecha = document.getElementById("nuevo_fecha").value;
+            const motivo = document.getElementById("nuevo_motivo").value;
+            const pacienteSeleccionado = document.getElementById("nuevo_paciente").value;
+            const nombreManual = document.getElementById("nuevo_nombre").value;
+
+            if (!fecha || !motivo) {
+                mostrarToast("Faltan datos ❌", "danger");
+                return;
+            }
+
+            const data = {
+                fecha: fecha,
+                motivo: motivo,
+                paciente_id: pacienteSeleccionado || null,
+                nombre_temp: nombreManual || null
+            };
+
+            const res = await fetch("/turnos", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + localStorage.getItem("token")
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!res.ok) {
+                mostrarToast("Error al crear ❌", "danger");
+                return;
+            }
+
+            mostrarToast("Turno creado ✅");
+
+            // limpiar
+            document.getElementById("nuevo_fecha").value = "";
+            document.getElementById("nuevo_motivo").value = "";
+            document.getElementById("nuevo_nombre").value = "";
+            document.getElementById("nuevo_paciente").value = "";
+
+            cargarAgenda();
+        }
+
+    </script>
+
+</body>
+</html>

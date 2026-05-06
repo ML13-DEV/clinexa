@@ -1,0 +1,441 @@
+/* =========================
+   🌙 DARK MODE BASE
+========================= */
+
+body.dark-mode {
+    background-color: #0f172a;
+    color: #e2e8f0;
+}
+
+/* =========================
+   TEXTOS
+========================= */
+
+.dark-mode h1,
+.dark-mode h2,
+.dark-mode h3,
+.dark-mode h4,
+.dark-mode h5 {
+    color: #f8fafc;
+}
+
+.dark-mode p,
+.dark-mode span,
+.dark-mode strong {
+    color: #e2e8f0;
+}
+
+.dark-mode .text-muted,
+.dark-mode small {
+    color: #94a3b8 !important;
+}
+
+/* =========================
+   LINKS
+========================= */
+
+.dark-mode a {
+    color: #60a5fa;
+}
+
+.dark-mode a:hover {
+    color: #3b82f6;
+}
+
+/* =========================
+   CARDS
+========================= */
+
+.dark-mode .card {
+    background-color: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    color: #e2e8f0; /* 🔥 clave */
+}
+
+.dark-mode .card:hover {
+    background-color: #334155;
+}
+
+/* 🔥 TODO el contenido dentro de la card */
+.dark-mode .card * {
+    color: #e2e8f0 !important;
+}
+
+/* 🔥 títulos pequeños */
+.dark-mode .card small {
+    color: #94a3b8 !important;
+}
+
+/* 🔥 textos "Sin datos" */
+.dark-mode .card span {
+    color: #cbd5f5 !important;
+}
+
+/* =========================
+   LISTAS
+========================= */
+
+.dark-mode .list-group-item {
+    background-color: #1e293b;
+    border-color: #334155;
+}
+
+/* =========================
+   INPUTS
+========================= */
+
+.dark-mode .form-control {
+    background-color: #1e293b;
+    border: 1px solid #334155;
+    color: #e2e8f0;
+}
+
+.dark-mode .form-control::placeholder {
+    color: #94a3b8;
+}
+
+.dark-mode .form-control:focus {
+    border-color: #3b82f6;
+    box-shadow: none;
+}
+
+.dark-mode .card textarea,
+.dark-mode .card input {
+    background-color: #0f172a;
+    color: #e2e8f0;
+    border: 1px solid #334155;
+}
+
+.dark-mode .card textarea::placeholder,
+.dark-mode .card input::placeholder {
+    color: #94a3b8;
+}
+
+/* =========================
+   BOTONES
+========================= */
+
+.dark-mode .btn-secondary {
+    background-color: #334155;
+    color: #e2e8f0;
+    border: none;
+}
+
+.dark-mode .btn-secondary:hover {
+    background-color: #475569;
+}
+
+.dark-mode .btn-dark {
+    background-color: #0f172a;
+    border: 1px solid #334155;
+}
+
+/* =========================
+   BADGES
+========================= */
+
+.dark-mode .badge.bg-warning {
+    background-color: #f59e0b !important;
+    color: #111;
+}
+
+.dark-mode .badge.bg-success {
+    background-color: #22c55e !important;
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.dark-mode .modal-content {
+    background-color: #1e293b;
+    color: #e2e8f0;
+}
+
+.dark-mode .modal-header,
+.dark-mode .modal-footer {
+    border-color: #334155;
+}
+
+.dark-mode .btn-close {
+    filter: invert(1);
+}
+
+/* =========================
+   TIMELINE
+========================= */
+
+.timeline {
+    border-left: 2px solid #cbd5f5;
+    margin-left: 20px;
+    padding-left: 20px;
+}
+
+.dark-mode .timeline {
+    border-left: 2px solid #334155;
+}
+
+.timeline-item {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -11px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.timeline-item.pendiente::before {
+    background-color: #f59e0b;
+}
+
+.timeline-item.atendido::before {
+    background-color: #22c55e;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 10px;
+}
+
+.dark-mode .timeline-content {
+    background: #1e293b;
+}
+
+/* =========================
+   AGENDA
+========================= */
+
+.agenda-item {
+    padding: 12px;
+    border-radius: 10px;
+    background: #f8f9fa;
+    margin-bottom: 10px;
+    transition: 0.2s;
+    cursor: pointer;
+}
+
+.agenda-item:hover {
+    transform: translateY(-2px);
+}
+
+.dark-mode .agenda-item {
+    background: #1e293b;
+    border: 1px solid #334155;
+}
+
+/* =========================
+   DASHBOARD CARDS
+========================= */
+
+.stat-card {
+    cursor: pointer;
+    transition: 0.2s;
+    min-height: 100px;
+    border-radius: 12px;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+}
+
+.dark-mode .stat-card {
+    background-color: #1e293b;
+    border: 1px solid #334155;
+}
+
+.dark-mode .stat-card small {
+    color: #94a3b8 !important;
+}
+
+/* =========================
+   BOTÓN VOLVER
+========================= */
+
+.btn-volver {
+    background: #606e83;
+    color: white;
+    border: none;
+}
+
+.btn-volver:hover {
+    background: #334155;
+    transform: translateX(-3px);
+}
+
+
+/* =========================
+   TABLA ANÁLISIS
+========================= */
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+table {
+    min-width: 1200px;
+}
+
+.dark-mode table {
+    color: #e2e8f0;
+}
+
+.dark-mode th {
+    background-color: #334155;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.dark-mode td {
+    background-color: #1e293b;
+}
+
+.dark-mode #ultimosTurnos .list-group-item {
+    background-color: #1e293b;
+    color: #e2e8f0;
+    border-color: #334155;
+}
+
+.dark-mode #ultimosTurnos .turno-fecha {
+    color: #cbd5f5; /* 🔥 más visible */
+    font-size: 0.9rem;
+}
+
+.dark-mode #ultimosTurnos strong {
+    color: #f8fafc;
+}
+
+th.activo {
+    background-color: #3b82f6 !important;
+    color: white;
+    cursor: pointer;
+}
+
+.agenda-item {
+    padding: 12px;
+    border-radius: 10px;
+    background: #f8f9fa;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+/* 📱 mobile */
+@media (max-width: 768px) {
+
+    .agenda-item {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .agenda-item button {
+        padding: 4px 6px;
+        font-size: 12px;
+    }
+
+}
+
+
+
+/* 1. Fondo azul marino oscuro (como el campo DNI de la imagen) */
+.form-control, .form-select {
+    background-color: #151c2b !important; 
+    color: #e2e8f0 !important; /* Un blanco azulado más suave */
+    border: 1px solid #2d3748 !important;
+}
+
+/* 2. ARREGLO PARA EL AUTOCOMPLETADO */
+/* Usamos el mismo azul marino para el fondo del autocompletado */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #151c2b inset !important; 
+    -webkit-text-fill-color: #e2e8f0 !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* 3. Estilo cuando haces clic (Focus) */
+.form-control:focus {
+    background-color: #1c2539 !important; /* Un pelín más claro al escribir */
+    border-color: #3b82f6 !important; /* Un azul más vibrante para el borde */
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25) !important;
+}
+
+/* 4. Color de los placeholders */
+.form-control::placeholder {
+    color: #d0d4db !important;
+}
+
+
+/* 1. Unificamos altura y comportamiento */
+/* Inputs unificados para la tabla de análisis */
+.input-tabla {
+    /* ... (tus otros estilos: background, color, border, etc.) ... */
+    background-color: #151c2b !important;
+    color: white !important;
+    border: 1px solid #3b82f6 !important;
+    
+    /* ESTO ES LO QUE CENTRA EL TEXTO */
+    text-align: center !important; 
+
+    /* ... (resto de estilos: height, padding, etc.) ... */
+    height: 28px !important;
+    padding: 0 4px !important;
+    font-size: 0.85rem !important;
+    width: 100% !important;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* 2. ELIMINA LAS FLECHITAS (Spin Buttons) en Chrome, Safari, Edge */
+.input-tabla::-webkit-outer-spin-button,
+.input-tabla::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+
+
+/* 4. Limpieza de celdas para que no haya aire de más */
+#tablaAnalisis td {
+    padding: 2px !important;
+    height: 32px !important;
+}
+
+/* Forzamos que la tabla no se achique más de 1800px */
+#tablaAnalisisParent {
+    width: 100%;
+    overflow-x: auto; /* Habilita el scroll horizontal */
+    border-radius: 8px;
+}
+
+.table-edit {
+    min-width: 1800px !important; /* Ajusta este valor según cuánto espacio quieras */
+    table-layout: fixed; /* Ayuda a que los anchos de columna se respeten */
+}
+
+/* Controlamos el ancho individual de las columnas */
+.table-edit th, .table-edit td {
+    width: 80px; /* Ancho estándar para columnas de números */
+    min-width: 80px;
+    padding: 8px 4px !important;
+}
+
+/* La columna de fecha y acciones suelen necesitar un poco más de espacio */
+.table-edit th:first-child, .table-edit td:first-child {
+    width: 120px;
+    min-width: 120px;
+}
+
+.table-edit th:last-child, .table-edit td:last-child {
+    width: 100px;
+    min-width: 100px;
+}
+
