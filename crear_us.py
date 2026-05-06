@@ -5,7 +5,7 @@ from app.models.usuario import Usuario
 db = SessionLocal()
 
 user = Usuario(
-    username="admin2",
+    username="admin",
     password=hash_password("1234")
 )
 
