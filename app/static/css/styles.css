@@ -2,6 +2,10 @@
    🌙 DARK MODE BASE
 ========================= */
 
+body {
+    overflow-x: hidden;
+}
+
 body.dark-mode {
     background-color: #0f172a;
     color: #e2e8f0;
@@ -281,6 +285,7 @@ body.dark-mode {
 
 table {
     min-width: 1200px;
+    font-size: 14px;
 }
 
 .dark-mode table {
@@ -330,16 +335,14 @@ th.activo {
 /* 📱 mobile */
 @media (max-width: 768px) {
 
-    .agenda-item {
-        font-size: 14px;
-        padding: 10px;
-    }
-
-    .agenda-item button {
-        padding: 4px 6px;
+    table {
         font-size: 12px;
     }
 
+    .btn {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
 }
 
 
@@ -439,3 +442,24 @@ input:-webkit-autofill:active {
     min-width: 100px;
 }
 
+.analisis-card {
+    border: none;
+    border-radius: 20px;
+    background: #34435c;
+}
+
+.bloque-analisis {
+    background: rgba(0,0,0,0.15);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.titulo-bloque {
+    color: white;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+textarea.form-control {
+    resize: vertical;
+}

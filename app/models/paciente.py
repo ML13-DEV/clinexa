@@ -8,15 +8,15 @@ class Paciente(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     # Datos personales
-    nombre = Column(String, nullable=False)
-    apellido = Column(String, nullable=False)
-    dni = Column(String, unique=True, index=True)
+    nombre = Column(String(100), nullable=False)
+    apellido = Column(String(100), nullable=False)
+    dni = Column(String(20), unique=True, index=True)
     fecha_nacimiento = Column(Date)
-    telefono = Column(String)
+    telefono = Column(String(20))
 
     # Obra social
-    obra_social = Column(String)
-    numero_afiliado = Column(String)
+    obra_social = Column(String(100))
+    numero_afiliado = Column(String(100))
 
     # Datos médicos
     sangrados = Column(Text)
@@ -24,7 +24,7 @@ class Paciente(Base):
     alergias = Column(Text)
     vacunas = Column(Text)
     gestas = Column(Text)
-    medico_cabecera = Column(String)
+    medico_cabecera = Column(String(100))
     fim_descriptivo = Column(Text)
 
     # Relaciones

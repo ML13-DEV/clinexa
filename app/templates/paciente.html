@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paciente</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/styles.css">
@@ -62,7 +62,7 @@
 
     <h3 class="mt-4">📋 Datos médicos</h3>
 
-    <div id="datosMedicos" class="row"></div>
+    <div id="datosMedicos" class="row g-3"></div>
 
     <h3>Nuevo Turno</h3>
 
@@ -114,47 +114,154 @@
 
     <br>
 
-    <h3 class="mt-4">🧪 Análisis de sangre</h3>
+    <div class="card p-4 shadow-lg analisis-card">
 
-    <!-- 🔹 FORM -->
-    <div id="formAnalisis" class="card p-3 mb-3">
+        <h2 class="mb-4">
+            🧪 Análisis de sangre
+        </h2>
 
-        <div class="row g-2">
-            <div class="col"><input id="fechaAnalisis" type="date" class="form-control mb-2"></div>
-            <div class="col"><input id="gb" class="form-control" placeholder="GB"></div>
-            <div class="col"><input id="nt" class="form-control" placeholder="NT"></div>
-            <div class="col"><input id="l" class="form-control" placeholder="L"></div>
-            <div class="col"><input id="hb" class="form-control" placeholder="HB"></div>
-            <div class="col"><input id="htd" class="form-control" placeholder="HTD"></div>
-            <div class="col"><input id="vcm" class="form-control" placeholder="VCM"></div>
-            <div class="col"><input id="pqts" class="form-control" placeholder="PQTS"></div>
-        </div>
+        <form id="formAnalisis">
 
-        <div class="row g-2 mt-2">
-            <div class="col"><input id="ferremia" class="form-control" placeholder="Ferremia"></div>
-            <div class="col"><input id="ferritina" class="form-control" placeholder="Ferritina"></div>
-            <div class="col"><input id="saturacion" class="form-control" placeholder="% Sat"></div>
-            <div class="col"><input id="tibc" class="form-control" placeholder="TIBC"></div>
-        </div>
+            <!-- HEMOGRAMA -->
+            <div class="bloque-analisis mb-4">
 
-        <div class="row g-2 mt-2">
-            <div class="col"><input id="epo" class="form-control" placeholder="EPO"></div>
-            <div class="col"><input id="vit_b12" class="form-control" placeholder="Vit B12"></div>
-            <div class="col"><input id="af" class="form-control" placeholder="AF"></div>
-        </div>
+                <h5 class="titulo-bloque">Hemograma</h5>
 
-        <div class="row g-2 mt-2">
-            <div class="col"><input id="tp" class="form-control" placeholder="TP"></div>
-            <div class="col"><input id="kptt" class="form-control" placeholder="KPTT"></div>
-            <div class="col"><input id="rino" class="form-control" placeholder="RIN"></div>
-        </div>
+                <div class="row g-3">
 
-        <div class="mt-2">
-            <input id="hepatograma" class="form-control mb-2" placeholder="Hepatograma">
-            <input id="funcion_renal" class="form-control" placeholder="Función renal">
-        </div>
+                    <div class="col-12 col-md-3">
+                        <input type="date" id="fecha" class="form-control">
+                    </div>
 
-        <button class="btn btn-success mt-3" onclick="crearAnalisis()">
+                    <div class="col-6 col-md-3">
+                        <input id="gb" class="form-control" placeholder="GB">
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <input id="nt" class="form-control" placeholder="NT">
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <input id="l" class="form-control" placeholder="L">
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <input id="hb" class="form-control" placeholder="HB">
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <input id="htd" class="form-control" placeholder="HTD">
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <input id="vcm" class="form-control" placeholder="VCM">
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <input id="pqts" class="form-control" placeholder="PQTS">
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- HIERRO -->
+            <div class="bloque-analisis mb-4">
+
+                <h5 class="titulo-bloque">Metabolismo del hierro</h5>
+
+                <div class="row g-3">
+
+                    <div class="col-6 col-md-3">
+                        <input id="ferremia" class="form-control" placeholder="Ferremia">
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <input id="ferritina" class="form-control" placeholder="Ferritina">
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <input id="saturacion" class="form-control" placeholder="% Saturación">
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <input id="tibc" class="form-control" placeholder="TIBC">
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- OTROS -->
+            <div class="bloque-analisis mb-4">
+
+                <h5 class="titulo-bloque">Otros estudios</h5>
+
+                <div class="row g-3">
+
+                    <div class="col-6 col-md-3">
+                        <input id="epo" class="form-control" placeholder="EPO">
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <input id="vit_b12" class="form-control" placeholder="Vitamina B12">
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <input id="af" class="form-control" placeholder="AF">
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- COAGULACION -->
+            <div class="bloque-analisis mb-4">
+
+                <h5 class="titulo-bloque">Coagulación</h5>
+
+                <div class="row g-3">
+
+                    <div class="col-6 col-md-3">
+                        <input id="tp" class="form-control" placeholder="TP">
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <input id="kptt" class="form-control" placeholder="KPTT">
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <input id="rino" class="form-control" placeholder="RIN">
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- OBSERVACIONES -->
+            <div class="bloque-analisis mb-4">
+
+                <h5 class="titulo-bloque">Observaciones</h5>
+
+                <div class="row g-3">
+
+                    <div class="col-12">
+                        <textarea id="hepatograma"
+                            class="form-control"
+                            rows="3"
+                            placeholder="Hepatograma"></textarea>
+                    </div>
+
+                    <div class="col-12">
+                        <textarea id="funcion_renal"
+                            class="form-control"
+                            rows="3"
+                            placeholder="Función renal"></textarea>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+
+        <button class="btn btn-success w-100 py-3"
+            onclick="crearAnalisis()">
+
             Guardar análisis
         </button>
 
@@ -162,7 +269,7 @@
 
     <!-- 🔹 TABLA -->
     <!-- 🔹 TABLA CON SCROLL HORIZONTAL -->
-    <div id="tablaAnalisisParent" class="table-responsive mt-3" style="max-height: 500px;">
+    <div id="tablaAnalisisParent" class="table-responsive mt-3" style="overflow-x: auto;">
         <table class="table table-dark table-striped table-hover text-center table-edit">
             <thead>
                 <tr>
@@ -289,7 +396,7 @@
                 <div class="col-md-4 mb-3">
                     <div class="card shadow-sm border-0 p-3 h-100">
 
-                        <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
                             <small class="text-muted">${titulo}</small>
 
                             <button class="btn btn-sm btn-outline-warning"
@@ -475,10 +582,10 @@
                 : "<span class='text-muted'>Sin datos</span>";
 
             return `
-                <div class="col-md-4 mb-3">
+                <div class="col-12 col-md-6 col-xl-3">
                     <div class="card shadow-sm border-0 p-3 h-100">
 
-                        <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
                             <small class="text-muted">${titulo}</small>
 
                             <button class="btn btn-sm btn-outline-warning"
@@ -856,6 +963,8 @@
                 console.warn("NO EXISTE INPUT:", id);
                 return null;
             }
+
+            console.log("Buscando:", id, el);
             return el.value === "" ? null : parseFloat(el.value);
         }
 
@@ -872,7 +981,7 @@
 
             console.log("ENTRÉ A CREAR ANALISIS");
 
-            const fechaInput = document.getElementById("fechaAnalisis");
+            const fechaInput = document.getElementById("fecha");
 
             // 🔥 fecha local segura (sin UTC)
             const hoy = new Date();
@@ -1166,6 +1275,10 @@
         function editarFila(btn, id) {
 
             const fila = btn.closest("tr");
+
+            // 🔥 evitar editar dos veces
+            if (fila.dataset.editando === "true") return;
+
             fila.dataset.editando = "true";
 
             const celdas = fila.querySelectorAll("td[data-campo]");
@@ -1173,39 +1286,27 @@
             celdas.forEach(td => {
 
                 const campo = td.dataset.campo;
-                let valor = td.innerText;
+                const valor = td.innerText;
 
-                // 🔥 limpiar "-"
-                if (valor === "-") valor = "";
-
-                // 🔥 FECHA
                 if (campo === "fecha") {
-
-                    const fechaFormateada = formatoInputFecha(valor);
 
                     td.innerHTML = `
                         <input 
-                            type="date" 
-                            class="form-control form-control-sm"
-                            value="${fechaFormateada}"
+                            type="date"
+                            class="form-control"
+                            value="${formatoInputFecha(valor)}"
+                        >
+                    `;
+
+                } else {
+
+                    td.innerHTML = `
+                        <input
+                            class="form-control"
+                            value="${valor === "-" ? "" : valor}"
                         >
                     `;
                 }
-                // 🔥 CAMPOS DE TEXTO LARGO
-                else if (["hepatograma", "funcion_renal"].includes(campo)) {
-                    td.innerHTML = `
-                        <textarea class="form-control form-control-sm">${valor}</textarea>
-                    `;
-                }
-
-                // 🔥 CAMPOS NUMÉRICOS
-                else {
-                    td.innerHTML = `
-                        <input type="number" class="form-control form-control-sm"
-                        value="${valor}">
-                    `;
-                }
-
             });
 
             toggleBotones(fila, true);
@@ -1272,14 +1373,25 @@
             }
         }
 
-        function cancelarEdicionFila(btn) {
-            cargarAnalisis(); // vuelve todo a estado original
+        async function cancelarEdicionFila(btn) {
+
+            const fila = btn.closest("tr");
+
+            // 🔥 sacar modo edición
+            fila.dataset.editando = "false";
+
+            // 🔥 recargar tabla completa
+            await cargarAnalisis();
         }
 
         function toggleBotones(fila, editando) {
-            fila.querySelector(".btn-warning").classList.toggle("d-none", editando);
-            fila.querySelector(".btn-success").classList.toggle("d-none", !editando);
-            fila.querySelector(".btn-secondary").classList.toggle("d-none", !editando);
+
+            const botones = fila.querySelectorAll("button");
+
+            botones[0].classList.toggle("d-none", editando); // editar
+            botones[1].classList.toggle("d-none", !editando); // guardar
+            botones[2].classList.toggle("d-none", !editando); // cancelar
+            botones[3].classList.toggle("d-none", editando); // eliminar
         }
 
         function formatoInputFecha(fechaTexto) {
