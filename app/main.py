@@ -1,13 +1,24 @@
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+
+from dotenv import load_dotenv
+
 from app.database import Base, engine
-from app.routes import pacientes, turnos, notas, auth
+
+# MODELOS
+from app.models.usuario import Usuario
 from app.models.paciente import Paciente
 from app.models.turnos import Turno
 from app.models.nota import Nota
-from fastapi.staticfiles import StaticFiles
+
+from app.modules.hematologia.models import Analisis
+
+# ROUTES
+from app.routes import pacientes, turnos, notas, auth
 from app.modules.hematologia.routes import router as analisis_router
+from app.routes import admin
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -21,6 +32,7 @@ app.include_router(turnos.router)
 app.include_router(notas.router)
 app.include_router(analisis_router)
 app.include_router(auth.router)
+app.include_router(admin.router)
 
 templates = Jinja2Templates(directory="app/templates")
 

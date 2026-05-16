@@ -6,8 +6,12 @@ db = SessionLocal()
 
 user = Usuario(
     username="admin",
-    password=hash_password("1234")
+    password=hash_password("1234"),
+    rol="admin",
+    especialidad="sistema"
 )
 
 db.add(user)
 db.commit()
+
+print("Admin creado ✅")
