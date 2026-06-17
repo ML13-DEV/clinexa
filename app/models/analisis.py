@@ -32,8 +32,8 @@ class Analisis(Base):
     af = Column(Float, nullable=True)
 
     # 🧪 FUNCIONES
-    hepatograma = Column(String, nullable=True)
-    funcion_renal = Column(String, nullable=True)
+    hepatograma = Column(String(255), nullable=True)
+    funcion_renal = Column(String(255), nullable=True)
 
     # 🧪 COAGULACIÓN
     tp = Column(Float, nullable=True)
