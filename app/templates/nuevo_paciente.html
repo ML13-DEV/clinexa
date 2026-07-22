@@ -15,10 +15,11 @@
     </script>
 </head>
 
-<body class="container mt-4">
+<body class="container-fluid py-4">
+    <div class="container">
 
     <!-- 🔙 Volver -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <a href="/" class="btn btn-outline-secondary">← Volver</a>
 
         <div class="d-flex gap-2">
@@ -37,24 +38,24 @@
         <!-- 🧍 DATOS PERSONALES -->
         <h5 class="mb-3">Datos personales</h5>
 
-        <div class="row">
-            <div class="col-md-6">
-                <input id="nombre" class="form-control mb-2" placeholder="Nombre">
+        <div class="row g-2">
+            <div class="col-12 col-md-6">
+                <input id="nombre" class="form-control" placeholder="Nombre">
             </div>
-            <div class="col-md-6">
-                <input id="apellido" class="form-control mb-2" placeholder="Apellido">
+            <div class="col-12 col-md-6">
+                <input id="apellido" class="form-control" placeholder="Apellido">
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-4">
-                <input id="dni" class="form-control mb-2" placeholder="DNI">
+        <div class="row g-2">
+            <div class="col-12 col-md-4">
+                <input id="dni" class="form-control" placeholder="DNI">
             </div>
-            <div class="col-md-4">
-                <input id="fecha" type="date" class="form-control mb-2">
+            <div class="col-12 col-md-4">
+                <input id="fecha" type="date" class="form-control">
             </div>
-            <div class="col-md-4">
-                <input id="telefono" class="form-control mb-2" placeholder="Teléfono">
+            <div class="col-12 col-md-4">
+                <input id="telefono" class="form-control" placeholder="Teléfono">
             </div>
         </div>
 
@@ -63,12 +64,12 @@
         <!-- 🏥 OBRA SOCIAL -->
         <h5 class="mb-3">Obra social</h5>
 
-        <div class="row">
-            <div class="col-md-6">
-                <input id="obra_social" class="form-control mb-2" placeholder="Obra social">
+        <div class="row g-2">
+            <div class="col-12 col-md-6">
+                <input id="obra_social" class="form-control" placeholder="Obra social">
             </div>
-            <div class="col-md-6">
-                <input id="numero_afiliado" class="form-control mb-2" placeholder="Número afiliado">
+            <div class="col-12 col-md-6">
+                <input id="numero_afiliado" class="form-control" placeholder="Número afiliado">
             </div>
         </div>
 
@@ -88,7 +89,7 @@
         <textarea id="fim_descriptivo" class="form-control mb-3" placeholder="FIM descriptivo"></textarea>
 
         <div class="text-end">
-            <button class="btn btn-success px-4" onclick="crearPaciente()">
+            <button class="btn btn-success w-100 w-md-auto" onclick="crearPaciente()">
                 Guardar paciente
             </button>
         </div>
@@ -105,6 +106,20 @@
         function logout() {
             localStorage.removeItem("token");
             window.location.href = "/login";
+        }
+
+        function mostrarToast(msg, tipo="success") {
+
+            const toast = document.createElement("div");
+            toast.className = `position-fixed bottom-0 end-0 m-3 p-3 text-white bg-${tipo}`;
+            toast.style.zIndex = 9999;
+            toast.innerText = msg;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 2500);
         }
 
 
@@ -141,11 +156,11 @@
             const data = await res.json();
 
             if (!res.ok) {
-                alert(data.detail || "Error ❌");
+                mostrarToast(data.detail || "Error ❌", "danger");
                 return;
             }
 
-            alert("Paciente creado correctamente ✅");
+            mostrarToast("Paciente creado correctamente ✅");
 
             window.location.href = "/";
         }
