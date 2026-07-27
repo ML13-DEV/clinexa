@@ -13,6 +13,11 @@ class NotaCreate(NotaBase):
     fecha: Optional[datetime] = None
 
 
+class NotaUpdate(BaseModel):
+    contenido: Optional[str] = None
+    fecha: Optional[datetime] = None
+
+
 class NotaResponse(NotaBase):
     id: int
     fecha: datetime

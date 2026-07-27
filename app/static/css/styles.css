@@ -199,10 +199,19 @@ body.dark-mode {
     background-color: #22c55e;
 }
 
+.timeline-item.nota::before {
+    background-color: #3b82f6;
+}
+
 .timeline-content {
     background: #f8f9fa;
     padding: 12px;
     border-radius: 10px;
+}
+
+.timeline-content .nota-texto {
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 .dark-mode .timeline-content {

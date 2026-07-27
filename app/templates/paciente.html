@@ -96,15 +96,6 @@
     </div>
 
 
-    <h3>Turnos</h3>
-    <div id="timelineTurnos" class="timeline"></div>
-
-    <div class="text-center mt-3">
-        <button id="btnVerMas" class="btn btn-outline-light" onclick="verMasTurnos()">
-            Ver más
-        </button>
-    </div>
-
     <h3>Notas</h3>
     <div class="card p-3 mb-3">
         <div class="row g-2">
@@ -119,7 +110,7 @@
         </div>
     </div>
 
-    <ul id="notas" class="list-group"></ul>
+    <div id="timelineNotas" class="timeline"></div>
 
     <div class="text-center mt-4 mb-4">
         <button id="btnVerMasNotas" class="btn btn-success" onclick="mostrarMasNotas()" style="display: none;">
@@ -238,6 +229,50 @@
         </div>
     </div>
 
+    <div class="modal fade" id="modalEditarNota" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+            <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Editar nota</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <textarea id="editNotaContenido" class="form-control" rows="6"></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary w-100 w-md-auto" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-success w-100 w-md-auto" onclick="guardarNotaEditada()">Guardar</button>
+            </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalEliminarNota" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+            <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Eliminar nota</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                ¿Eliminar esta nota? Esta acción no se puede deshacer.
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary w-100 w-md-auto" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-danger w-100 w-md-auto" onclick="confirmarEliminarNota()">Confirmar</button>
+            </div>
+
+            </div>
+        </div>
+    </div>
+
 
     <script>
 
@@ -307,16 +342,20 @@
             return `<td data-campo="${campo}"${claseAttr}>${valor ?? "-"}</td>`;
         }
 
-        let limiteTurnos = 3;
-        function verMasTurnos() {
-            limiteTurnos += 3; // Aumentamos de a 3
-            cargarPaciente();
-        }
-
         let limiteNotas = 3;
         function mostrarMasNotas() {
             limiteNotas += 3; // Aumentamos de a 3
             cargarPaciente(); // Volvemos a renderizar
+        }
+
+        let notasCache = [];
+        let notaEditandoId = null;
+        let notaEliminarId = null;
+
+        function escapeHtml(texto) {
+            const div = document.createElement("div");
+            div.innerText = texto ?? "";
+            return div.innerHTML;
         }
 
         function formatearFecha(fecha) {
@@ -510,105 +549,41 @@
             `;
 
             // =========================
-            // 📅 TURNOS
+            // 📝 NOTAS (timeline)
             // =========================
 
-            const contenedor = document.getElementById("timelineTurnos");
-            contenedor.innerHTML = "";
+            notasCache = data.notas;
 
-            if (data.turnos.length <= limiteTurnos) {
-                document.querySelector("#btnVerMas").style.display = "none";
-            }
+            const timelineNotas = document.getElementById("timelineNotas");
+            timelineNotas.innerHTML = "";
 
-            data.turnos.slice(0, limiteTurnos).forEach(t => {
+            data.notas.slice(0, limiteNotas).forEach(n => {
 
                 const div = document.createElement("div");
-                div.className = `timeline-item ${t.estado}`;
+                div.className = "timeline-item nota";
 
                 div.innerHTML = `
                     <div class="timeline-content">
 
-                        <div class="mb-1">
-                            <strong>${formatearFecha(t.fecha)}</strong>
-                        </div>
+                        <div class="d-flex justify-content-between align-items-start mb-1 gap-2">
+                            <strong>${formatearFecha(n.fecha)}</strong>
 
-                        <div><strong>Motivo:</strong> ${t.motivo}</div>
-                        <div><strong>Estado:</strong> ${t.estado}</div>
-
-                        ${
-                            t.estado === "atendido" ? `
-                                <div><strong>Diagnóstico:</strong> ${t.diagnostico || "-"}</div>
-                                <div><strong>Observaciones:</strong> ${t.observaciones || "-"}</div>
-                            ` : ""
-                        }
-
-                        ${
-                            t.estado === "pendiente" ? `
-                                <button class="btn btn-sm btn-success mt-2" onclick="mostrarFormulario(${t.id})">
-                                    Atender
-                                </button>
-
-                                <button class="btn btn-sm btn-warning mt-2 ms-2" onclick="editarTurno(${t.id}, '${t.motivo}', '${t.fecha}')">
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-warning" onclick="abrirModalEditarNota(${n.id})">
                                     ✏️
                                 </button>
-
-                                <button class="btn btn-sm btn-danger mt-2 ms-2" onclick="eliminarTurno(${t.id})">
+                                <button class="btn btn-sm btn-danger" onclick="abrirModalEliminarNota(${n.id})">
                                     🗑️
                                 </button>
+                            </div>
+                        </div>
 
-                                <!-- 🔥 FORMULARIO ATENDER -->
-                                <div id="form-${t.id}" style="display:none;" class="mt-2">
-                                    <input id="diag-${t.id}" class="form-control mb-1" placeholder="Diagnóstico">
-                                    <input id="obs-${t.id}" class="form-control mb-1" placeholder="Observaciones">
-
-                                    <button class="btn btn-primary btn-sm" onclick="guardarAtencion(${t.id})">
-                                        Guardar
-                                    </button>
-                                </div>
-                            ` : ""
-
-                        }
+                        <div class="nota-texto">${escapeHtml(n.contenido)}</div>
 
                     </div>
                 `;
 
-                contenedor.appendChild(div);
-            });
-                        
-            
-            function mostrarToast(msg, tipo="success") {
-
-                const toast = document.createElement("div");
-                toast.className = `position-fixed bottom-0 end-0 m-3 p-3 text-white bg-${tipo}`;
-                toast.style.zIndex = 9999;
-                toast.innerText = msg;
-
-                document.body.appendChild(toast);
-
-                setTimeout(() => {
-                    toast.remove();
-                }, 2500);
-            }
-
-            // =========================
-            // 📝 NOTAS
-            // =========================
-
-            const notas = document.getElementById("notas");
-            notas.innerHTML = "";
-
-            data.notas.slice(0, limiteNotas).forEach(n => {
-                const li = document.createElement("li");
-                li.className = "list-group-item bg-dark text-white border-secondary mb-1";
-                li.innerHTML = `
-                    <div class="d-flex justify-content-between">
-                        <div><strong>Nota:</strong></div>
-                        <small class="text-info">${formatearFecha(n.fecha)}</small>
-                    </div>
-                    <div class="mt-1">${n.contenido}</div>
-                `;
-
-                notas.appendChild(li);
+                timelineNotas.appendChild(div);
             });
 
             const btnNotas = document.getElementById("btnVerMasNotas");
@@ -737,45 +712,6 @@
             cargarPaciente();
         }
 
-        async function marcarAtendido(turnoId) {
-            await fetch(`/turnos/${turnoId}/atender`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + localStorage.getItem("token")
-                },
-                body: JSON.stringify({
-                    diagnostico: diagnostico,
-                    observaciones: observaciones
-                })
-            });
-
-            cargarPaciente(); // refresca la lista
-        }
-
-        function mostrarFormulario(turnoId) {
-            document.getElementById(`form-${turnoId}`).style.display = "block";
-        }
-
-        async function guardarAtencion(turnoId) {
-            const diagnostico = document.getElementById(`diag-${turnoId}`).value;
-            const observaciones = document.getElementById(`obs-${turnoId}`).value;
-
-            await fetch(`/turnos/${turnoId}/atender`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + localStorage.getItem("token")
-                },
-                body: JSON.stringify({
-                    diagnostico: diagnostico,
-                    observaciones: observaciones
-                })
-            });
-
-            cargarPaciente();
-        }
-
         async function guardarEdicion() {
 
             const paciente = {
@@ -881,52 +817,68 @@
             document.getElementById("formEditar").style.display = "block";
         }
 
-        function eliminarTurno(id) {
+        function abrirModalEditarNota(id) {
+            const nota = notasCache.find(n => n.id === id);
+            if (!nota) return;
 
-            mostrarConfirm("¿Eliminar turno?", async () => {
+            notaEditandoId = id;
+            document.getElementById("editNotaContenido").value = nota.contenido;
 
-                const res = await fetch(`/turnos/${id}`, {
-                    method: "DELETE",
-                    headers: {
-                        "Authorization": `Bearer ${localStorage.getItem("token")}`
-                    }
-                });
-
-                if (!res.ok) {
-                    mostrarToast("Error ❌", "danger");
-                    return;
-                }
-
-                mostrarToast("Turno eliminado 🗑");
-                cargarTurnosHoy();
-            });
+            new bootstrap.Modal(document.getElementById("modalEditarNota")).show();
         }
 
+        async function guardarNotaEditada() {
 
-        function editarTurno(id, motivo, fecha) {
+            const contenido = document.getElementById("editNotaContenido").value.trim();
 
-            const nuevoMotivo = prompt("Nuevo motivo:", motivo);
-            if (!nuevoMotivo) return;
+            if (!contenido) {
+                mostrarToast("La nota no puede estar vacía ❌", "danger");
+                return;
+            }
 
-            fetch(`/turnos/${id}`, {
+            const res = await fetch(`/notas/${notaEditandoId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": "Bearer " + localStorage.getItem("token")
                 },
-                body: JSON.stringify({
-                    motivo: nuevoMotivo,
-                    fecha: fecha
-                })
-            })
-            .then(res => {
-                if (!res.ok) throw new Error();
-                mostrarToast("Turno actualizado ✏️");
-                cargarPaciente();
-            })
-            .catch(() => {
-                mostrarToast("Error al editar ❌", "danger");
+                body: JSON.stringify({ contenido })
             });
+
+            if (!res.ok) {
+                mostrarToast("Error al actualizar la nota ❌", "danger");
+                return;
+            }
+
+            bootstrap.Modal.getInstance(document.getElementById("modalEditarNota")).hide();
+            mostrarToast("Nota actualizada ✏️");
+            cargarPaciente();
+        }
+
+        function abrirModalEliminarNota(id) {
+            notaEliminarId = id;
+            new bootstrap.Modal(document.getElementById("modalEliminarNota")).show();
+        }
+
+        async function confirmarEliminarNota() {
+
+            if (!notaEliminarId) return;
+
+            const res = await fetch(`/notas/${notaEliminarId}`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": "Bearer " + localStorage.getItem("token")
+                }
+            });
+
+            if (!res.ok) {
+                mostrarToast("Error al eliminar la nota ❌", "danger");
+                return;
+            }
+
+            bootstrap.Modal.getInstance(document.getElementById("modalEliminarNota")).hide();
+            mostrarToast("Nota eliminada 🗑");
+            cargarPaciente();
         }
 
         function cancelarEdicion(campo) {
@@ -1464,40 +1416,6 @@
 
             return `${anio}-${mes.padStart(2, "0")}-${dia.padStart(2, "0")}`;
         }
-
-        function confirmar(msg, callback) {
-
-        document.getElementById("modalTexto").innerText = msg;
-
-        const btn = document.getElementById("btnConfirmar");
-
-        btn.onclick = () => {
-            callback();
-            bootstrap.Modal.getInstance(document.getElementById("modalConfirm")).hide();
-        };
-
-        new bootstrap.Modal(document.getElementById("modalConfirm")).show();
-    }
-
-    function mostrarConfirm(mensaje, callbackConfirm) {
-
-        const modalEl = document.getElementById("confirmModal");
-        const modal = new bootstrap.Modal(modalEl);
-
-        document.getElementById("confirmText").innerText = mensaje;
-
-        const btn = document.getElementById("confirmBtn");
-
-        // 🔥 limpiar eventos anteriores
-        btn.onclick = null;
-
-        btn.onclick = () => {
-            callbackConfirm();
-            modal.hide();
-        };
-
-        modal.show();
-    }
 
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

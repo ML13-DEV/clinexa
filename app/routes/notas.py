@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app.models.nota import Nota
-from app.schemas.nota import NotaCreate
+from app.schemas.nota import NotaCreate, NotaUpdate
 from app.auth import get_current_user
 
 router = APIRouter(
@@ -29,3 +29,45 @@ def crear_nota(
     db.commit()
     db.refresh(nueva_nota)
     return nueva_nota
+
+
+@router.put("/notas/{id}")
+def actualizar_nota(
+    id: int,
+    data: NotaUpdate,
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user)
+    ):
+
+    nota = db.query(Nota).filter(Nota.id == id).first()
+
+    if not nota:
+        raise HTTPException(status_code=404, detail="Nota no encontrada")
+
+    cambios = data.dict(exclude_unset=True)
+
+    for key, value in cambios.items():
+        setattr(nota, key, value)
+
+    db.commit()
+    db.refresh(nota)
+
+    return nota
+
+
+@router.delete("/notas/{id}")
+def eliminar_nota(
+    id: int,
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user)
+    ):
+
+    nota = db.query(Nota).filter(Nota.id == id).first()
+
+    if not nota:
+        raise HTTPException(status_code=404, detail="Nota no encontrada")
+
+    db.delete(nota)
+    db.commit()
+
+    return {"ok": True}
