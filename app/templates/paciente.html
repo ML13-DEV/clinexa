@@ -1309,8 +1309,8 @@
                         >
                     `;
                 }
-                // 🔥 CAMPOS DE TEXTO LARGO
-                else if (["hepatograma", "funcion_renal"].includes(campo)) {
+                // 🔥 CAMPOS DE TEXTO LARGO (texto libre)
+                else if (["hepatograma", "funcion_renal", "otros_analisis"].includes(campo)) {
                     td.innerHTML = `
                         <textarea class="form-control form-control-sm">${valor}</textarea>
                     `;
@@ -1351,8 +1351,8 @@
                     data[campo] = valor;
                 }
 
-                // 🔥 TEXTOS
-                else if (["hepatograma", "funcion_renal"].includes(campo)) {
+                // 🔥 TEXTOS (texto libre)
+                else if (["hepatograma", "funcion_renal", "otros_analisis"].includes(campo)) {
                     data[campo] = valor;
                 }
 
