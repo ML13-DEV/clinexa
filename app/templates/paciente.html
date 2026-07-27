@@ -259,6 +259,54 @@
         let campoActual = "hb"; // default
         let chart = null;
 
+        // =========================
+        // 🎨 RANGOS NORMALES (a definir a futuro)
+        // =========================
+        // Estructura preparada para cargar los rangos normales de cada
+        // análisis más adelante. Mientras min/max sean null, colorearValor()
+        // no aplica ningún color (comportamiento actual sin cambios).
+        const RANGOS_NORMALES = {
+            gb: { min: null, max: null },
+            nt: { min: null, max: null },
+            l: { min: null, max: null },
+            hb: { min: null, max: null },
+            hto: { min: null, max: null },
+            vcm: { min: null, max: null },
+            pqts: { min: null, max: null },
+            ferremia: { min: null, max: null },
+            ferritina: { min: null, max: null },
+            saturacion: { min: null, max: null },
+            tibc: { min: null, max: null },
+            epo: { min: null, max: null },
+            vit_b12: { min: null, max: null },
+            af: { min: null, max: null },
+            ldh: { min: null, max: null },
+            tp: { min: null, max: null },
+            kptt: { min: null, max: null },
+            rino: { min: null, max: null }
+        };
+
+        // rojo = alto, azul = bajo, verde = normal.
+        // Devuelve la clase CSS a aplicar, o null si el campo no tiene rango
+        // normal definido todavía o el valor no es numérico.
+        function colorearValor(campo, valor) {
+            const rango = RANGOS_NORMALES[campo];
+            if (!rango || rango.min === null || rango.max === null) return null;
+
+            const numero = parseFloat(valor);
+            if (Number.isNaN(numero)) return null;
+
+            if (numero > rango.max) return "valor-alto";
+            if (numero < rango.min) return "valor-bajo";
+            return "valor-normal";
+        }
+
+        function celdaAnalisis(campo, valor) {
+            const clase = colorearValor(campo, valor);
+            const claseAttr = clase ? ` class="${clase}"` : "";
+            return `<td data-campo="${campo}"${claseAttr}>${valor ?? "-"}</td>`;
+        }
+
         let limiteTurnos = 3;
         function verMasTurnos() {
             limiteTurnos += 3; // Aumentamos de a 3
@@ -922,30 +970,30 @@
 
                 row.innerHTML = `
                     <td data-campo="fecha">${soloFecha(a.fecha)}</td>
-                    <td data-campo="gb">${a.gb ?? "-"}</td>
-                    <td data-campo="nt">${a.nt ?? "-"}</td>
-                    <td data-campo="l">${a.l ?? "-"}</td>
-                    <td data-campo="hb">${a.hb ?? "-"}</td>
-                    <td data-campo="hto">${a.hto ?? "-"}</td>
-                    <td data-campo="vcm">${a.vcm ?? "-"}</td>
-                    <td data-campo="pqts">${a.pqts ?? "-"}</td>
+                    ${celdaAnalisis("gb", a.gb)}
+                    ${celdaAnalisis("nt", a.nt)}
+                    ${celdaAnalisis("l", a.l)}
+                    ${celdaAnalisis("hb", a.hb)}
+                    ${celdaAnalisis("hto", a.hto)}
+                    ${celdaAnalisis("vcm", a.vcm)}
+                    ${celdaAnalisis("pqts", a.pqts)}
 
-                    <td data-campo="ferremia">${a.ferremia ?? "-"}</td>
-                    <td data-campo="ferritina">${a.ferritina ?? "-"}</td>
-                    <td data-campo="saturacion">${a.saturacion ?? "-"}</td>
-                    <td data-campo="tibc">${a.tibc ?? "-"}</td>
+                    ${celdaAnalisis("ferremia", a.ferremia)}
+                    ${celdaAnalisis("ferritina", a.ferritina)}
+                    ${celdaAnalisis("saturacion", a.saturacion)}
+                    ${celdaAnalisis("tibc", a.tibc)}
 
-                    <td data-campo="epo">${a.epo ?? "-"}</td>
-                    <td data-campo="vit_b12">${a.vit_b12 ?? "-"}</td>
-                    <td data-campo="af">${a.af ?? "-"}</td>
-                    <td data-campo="ldh">${a.ldh ?? "-"}</td>
+                    ${celdaAnalisis("epo", a.epo)}
+                    ${celdaAnalisis("vit_b12", a.vit_b12)}
+                    ${celdaAnalisis("af", a.af)}
+                    ${celdaAnalisis("ldh", a.ldh)}
 
                     <td data-campo="hepatograma">${a.hepatograma ?? "-"}</td>
                     <td data-campo="funcion_renal">${a.funcion_renal ?? "-"}</td>
 
-                    <td data-campo="tp">${a.tp ?? "-"}</td>
-                    <td data-campo="kptt">${a.kptt ?? "-"}</td>
-                    <td data-campo="rino">${a.rino ?? "-"}</td>
+                    ${celdaAnalisis("tp", a.tp)}
+                    ${celdaAnalisis("kptt", a.kptt)}
+                    ${celdaAnalisis("rino", a.rino)}
 
                     <td data-campo="otros_analisis">${a.otros_analisis ?? "-"}</td>
 

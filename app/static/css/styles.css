@@ -471,3 +471,23 @@ input:-webkit-autofill:active {
     min-width: 100px;
 }
 
+/* =========================
+   🎨 COLOR DE VALORES DE ANÁLISIS
+   (rangos normales a definir a futuro, ver colorearValor() en paciente.html)
+========================= */
+
+.valor-alto {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+.valor-bajo {
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+.valor-normal {
+    color: #22c55e;
+    font-weight: 600;
+}
+
