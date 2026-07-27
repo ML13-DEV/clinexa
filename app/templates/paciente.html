@@ -146,7 +146,7 @@
             <div class="col"><input id="nt" class="form-control" placeholder="NT"></div>
             <div class="col"><input id="l" class="form-control" placeholder="L"></div>
             <div class="col"><input id="hb" class="form-control" placeholder="HB"></div>
-            <div class="col"><input id="htd" class="form-control" placeholder="HTD"></div>
+            <div class="col"><input id="hto" class="form-control" placeholder="HTO"></div>
             <div class="col"><input id="vcm" class="form-control" placeholder="VCM"></div>
             <div class="col"><input id="pqts" class="form-control" placeholder="PQTS"></div>
             <div class="col"><input id="ferremia" class="form-control" placeholder="Ferremia"></div>
@@ -180,7 +180,7 @@
                     <th onclick="cambiarGrafico('nt', this)">NT</th>
                     <th onclick="cambiarGrafico('l', this)">LLL</th>
                     <th onclick="cambiarGrafico('hb', this)">HB</th>
-                    <th onclick="cambiarGrafico('htd', this)">HTD</th>
+                    <th onclick="cambiarGrafico('hto', this)">HTO</th>
                     <th onclick="cambiarGrafico('vcm', this)">VCM</th>
                     <th onclick="cambiarGrafico('pqts', this)">PQTS</th>
                     <th onclick="cambiarGrafico('ferremia', this)">Ferrem</th>
@@ -920,7 +920,7 @@
                     <td data-campo="nt">${a.nt ?? "-"}</td>
                     <td data-campo="l">${a.l ?? "-"}</td>
                     <td data-campo="hb">${a.hb ?? "-"}</td>
-                    <td data-campo="htd">${a.htd ?? "-"}</td>
+                    <td data-campo="hto">${a.hto ?? "-"}</td>
                     <td data-campo="vcm">${a.vcm ?? "-"}</td>
                     <td data-campo="pqts">${a.pqts ?? "-"}</td>
 
@@ -995,7 +995,7 @@
                 nt: getValue("nt"),
                 l: getValue("l"),
                 hb: getValue("hb"),
-                htd: getValue("htd"),
+                hto: getValue("hto"),
                 vcm: getValue("vcm"),
                 pqts: getValue("pqts"),
 
@@ -1095,7 +1095,7 @@
                 nt: parseNumber(inputs[1].value),
                 l: parseNumber(inputs[2].value),
                 hb: parseNumber(inputs[3].value),
-                htd: parseNumber(inputs[4].value),
+                hto: parseNumber(inputs[4].value),
                 vcm: parseNumber(inputs[5].value),
                 pqts: parseNumber(inputs[6].value),
                 ferritina: parseNumber(inputs[7].value),
