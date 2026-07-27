@@ -156,11 +156,15 @@
             <div class="col"><input id="epo" class="form-control" placeholder="EPO"></div>
             <div class="col"><input id="vit_b12" class="form-control" placeholder="Vit B12"></div>
             <div class="col"><input id="af" class="form-control" placeholder="AF"></div>
+            <div class="col"><input id="ldh" class="form-control" placeholder="LDH"></div>
             <div class="col"><input id="tp" class="form-control" placeholder="TP"></div>
             <div class="col"><input id="kptt" class="form-control" placeholder="KPTT"></div>
             <div class="col"><input id="rino" class="form-control" placeholder="RIN"></div>
             <div class="col"><input id="hepatograma" class="form-control" placeholder="Hepatograma"></div>
             <div class="col"><input id="funcion_renal" class="form-control" placeholder="Función renal"></div>
+            <div class="col col-lg-6">
+                <textarea id="otros_analisis" class="form-control" placeholder="Otros análisis"></textarea>
+            </div>
         </div>
 
         <button class="btn btn-success mt-3 w-100 w-md-auto" onclick="crearAnalisis()">
@@ -190,11 +194,13 @@
                     <th onclick="cambiarGrafico('epo', this)">EPO</th>
                     <th onclick="cambiarGrafico('vit_b12', this)">B12</th>
                     <th onclick="cambiarGrafico('af', this)">AF</th>
+                    <th onclick="cambiarGrafico('ldh', this)">LDH</th>
                     <th onclick="cambiarGrafico('hepatograma', this)">Hep</th>
                     <th onclick="cambiarGrafico('funcion_renal', this)">Ren</th>
                     <th onclick="cambiarGrafico('tp', this)">TP</th>
                     <th onclick="cambiarGrafico('kptt', this)">KPTT</th>
                     <th onclick="cambiarGrafico('rino', this)">RIN</th>
+                    <th onclick="cambiarGrafico('otros_analisis', this)">Otros</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -932,6 +938,7 @@
                     <td data-campo="epo">${a.epo ?? "-"}</td>
                     <td data-campo="vit_b12">${a.vit_b12 ?? "-"}</td>
                     <td data-campo="af">${a.af ?? "-"}</td>
+                    <td data-campo="ldh">${a.ldh ?? "-"}</td>
 
                     <td data-campo="hepatograma">${a.hepatograma ?? "-"}</td>
                     <td data-campo="funcion_renal">${a.funcion_renal ?? "-"}</td>
@@ -939,6 +946,8 @@
                     <td data-campo="tp">${a.tp ?? "-"}</td>
                     <td data-campo="kptt">${a.kptt ?? "-"}</td>
                     <td data-campo="rino">${a.rino ?? "-"}</td>
+
+                    <td data-campo="otros_analisis">${a.otros_analisis ?? "-"}</td>
 
                     <td>
                         <button class="btn btn-sm btn-warning" onclick="editarFila(this, ${a.id})">✏️</button>
@@ -1007,13 +1016,16 @@
                 epo: getValue("epo"),
                 vit_b12: getValue("vit_b12"),
                 af: getValue("af"),
+                ldh: getValue("ldh"),
 
                 hepatograma: getValueText("hepatograma"),
                 funcion_renal: getValueText("funcion_renal"),
 
                 tp: getValue("tp"),
                 kptt: getValue("kptt"),
-                rino: getValue("rino")
+                rino: getValue("rino"),
+
+                otros_analisis: getValueText("otros_analisis")
             };
 
             try {
