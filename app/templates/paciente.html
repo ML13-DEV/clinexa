@@ -96,15 +96,6 @@
     </div>
 
 
-    <h3>Turnos</h3>
-    <div id="timelineTurnos" class="timeline"></div>
-
-    <div class="text-center mt-3">
-        <button id="btnVerMas" class="btn btn-outline-light" onclick="verMasTurnos()">
-            Ver más
-        </button>
-    </div>
-
     <h3>Notas</h3>
     <div class="card p-3 mb-3">
         <div class="row g-2">
@@ -119,7 +110,7 @@
         </div>
     </div>
 
-    <ul id="notas" class="list-group"></ul>
+    <div id="timelineNotas" class="timeline"></div>
 
     <div class="text-center mt-4 mb-4">
         <button id="btnVerMasNotas" class="btn btn-success" onclick="mostrarMasNotas()" style="display: none;">
@@ -232,6 +223,50 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary w-100 w-md-auto" data-bs-dismiss="modal">Cancelar</button>
                 <button class="btn btn-danger w-100 w-md-auto" id="btnConfirmarEliminar">Confirmar</button>
+            </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalEditarNota" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+            <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Editar nota</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <textarea id="editNotaContenido" class="form-control" rows="6"></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary w-100 w-md-auto" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-success w-100 w-md-auto" onclick="guardarNotaEditada()">Guardar</button>
+            </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalEliminarNota" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+            <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Eliminar nota</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                ¿Eliminar esta nota? Esta acción no se puede deshacer.
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary w-100 w-md-auto" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-danger w-100 w-md-auto" onclick="confirmarEliminarNota()">Confirmar</button>
             </div>
 
             </div>
