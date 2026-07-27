@@ -9,8 +9,7 @@ from app.database import SessionLocal
 from app.models.paciente import Paciente
 from app.models.turnos import Turno
 from app.models.nota import Nota
-from app.schemas.analisis import AnalisisUpdate
-from app.schemas.paciente import PacienteCreate
+from app.schemas.paciente import PacienteCreate, PacienteUpdate
 
 from app.auth import get_current_user
 
@@ -42,6 +41,16 @@ def calcular_edad(fecha_nacimiento):
     )
 
 
+def calcular_imc(peso, talla):
+    """Talla en centímetros, peso en kilogramos. IMC = peso / (talla_m)^2."""
+    if not peso or not talla:
+        return None
+    talla_m = talla / 100
+    if talla_m <= 0:
+        return None
+    return round(peso / (talla_m ** 2), 2)
+
+
 # =========================
 # VISTA HTML (MUY IMPORTANTE ARRIBA)
 # =========================
@@ -71,6 +80,8 @@ def crear_paciente(
         raise HTTPException(status_code=400, detail="DNI ya registrado")
 
     nuevo = Paciente(**paciente.dict())
+    nuevo.imc = calcular_imc(nuevo.peso, nuevo.talla)
+
     db.add(nuevo)
     db.commit()
     db.refresh(nuevo)
@@ -136,7 +147,7 @@ def obtener_paciente(
 @router.put("/pacientes/{id}")
 def actualizar_paciente(
     id: int,
-    data: AnalisisUpdate,
+    data: PacienteUpdate,
     db: Session = Depends(get_db),
     user = Depends(get_current_user)
 ):
@@ -146,13 +157,18 @@ def actualizar_paciente(
     if not paciente:
         raise HTTPException(status_code=404, detail="Paciente no encontrado")
 
-    if "dni" in data:
-        existente = db.query(Paciente).filter(Paciente.dni == data["dni"]).first()
+    cambios = data.dict(exclude_unset=True)
+
+    if "dni" in cambios:
+        existente = db.query(Paciente).filter(Paciente.dni == cambios["dni"]).first()
         if existente and existente.id != id:
             raise HTTPException(status_code=400, detail="DNI ya registrado")
 
-    for key, value in data.dict(exclude_unset=True).items():
+    for key, value in cambios.items():
         setattr(paciente, key, value)
+
+    if "peso" in cambios or "talla" in cambios:
+        paciente.imc = calcular_imc(paciente.peso, paciente.talla)
 
     db.commit()
     db.refresh(paciente)

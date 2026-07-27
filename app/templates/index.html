@@ -94,6 +94,27 @@
                     <textarea id="edit_medico_cabecera" class="form-control mb-2" placeholder="Médico de cabecera"></textarea>
                     <textarea id="edit_fim_descriptivo" class="form-control mb-2" placeholder="FIM descriptivo"></textarea>
 
+                    <div class="row g-2 mb-2">
+                        <div class="col-4">
+                            <input id="edit_peso" type="number" step="0.1" class="form-control" placeholder="Peso (kg)" oninput="actualizarImcModal()">
+                        </div>
+                        <div class="col-4">
+                            <input id="edit_talla" type="number" step="0.1" class="form-control" placeholder="Talla (cm)" oninput="actualizarImcModal()">
+                        </div>
+                        <div class="col-4">
+                            <input id="edit_imc" class="form-control" placeholder="IMC" readonly>
+                        </div>
+                    </div>
+
+                    <input id="edit_ocupacion" class="form-control mb-2" placeholder="Ocupación">
+                    <textarea id="edit_diagnostico_principal" class="form-control mb-2" placeholder="Diagnóstico principal"></textarea>
+                    <textarea id="edit_habitos" class="form-control mb-2" placeholder="Hábitos"></textarea>
+                    <textarea id="edit_medicacion_habitual" class="form-control mb-2" placeholder="Medicación habitual"></textarea>
+                    <textarea id="edit_cirugias" class="form-control mb-2" placeholder="Cirugías"></textarea>
+                    <textarea id="edit_transfusiones" class="form-control mb-2" placeholder="Transfusiones"></textarea>
+                    <textarea id="edit_antecedentes_personales" class="form-control mb-2" placeholder="Antecedentes personales"></textarea>
+                    <textarea id="edit_antecedentes_familiares" class="form-control mb-2" placeholder="Antecedentes familiares"></textarea>
+
                 </div>
 
                 <!-- 🔥 FOOTER -->
@@ -469,6 +490,18 @@
             document.getElementById("edit_medico_cabecera").value = p.medico_cabecera || "";
             document.getElementById("edit_fim_descriptivo").value = p.fim_descriptivo || "";
 
+            document.getElementById("edit_peso").value = p.peso ?? "";
+            document.getElementById("edit_talla").value = p.talla ?? "";
+            document.getElementById("edit_imc").value = p.imc ?? "";
+            document.getElementById("edit_ocupacion").value = p.ocupacion || "";
+            document.getElementById("edit_diagnostico_principal").value = p.diagnostico_principal || "";
+            document.getElementById("edit_habitos").value = p.habitos || "";
+            document.getElementById("edit_medicacion_habitual").value = p.medicacion_habitual || "";
+            document.getElementById("edit_cirugias").value = p.cirugias || "";
+            document.getElementById("edit_transfusiones").value = p.transfusiones || "";
+            document.getElementById("edit_antecedentes_personales").value = p.antecedentes_personales || "";
+            document.getElementById("edit_antecedentes_familiares").value = p.antecedentes_familiares || "";
+
             window.pacienteEditando = id;
 
             // 🔥 ESTO ES LO QUE ABRE EL MODAL
@@ -476,13 +509,28 @@
             modal.show();
         }
 
+        function getValueNumber(id) {
+            const valor = document.getElementById(id).value;
+            return valor === "" ? null : parseFloat(valor);
+        }
+
+        function calcularImc(peso, talla) {
+            if (!peso || !talla) return null;
+            const tallaM = talla / 100;
+            if (tallaM <= 0) return null;
+            return Math.round((peso / (tallaM * tallaM)) * 100) / 100;
+        }
+
+        function actualizarImcModal() {
+            const peso = parseFloat(document.getElementById("edit_peso").value);
+            const talla = parseFloat(document.getElementById("edit_talla").value);
+            const imc = calcularImc(peso, talla);
+            document.getElementById("edit_imc").value = imc ?? "";
+        }
+
         async function guardarEdicion() {
 
             const paciente = {
-                nombre: document.getElementById("edit_nombre").value,
-                apellido: document.getElementById("edit_apellido").value,
-                dni: document.getElementById("edit_dni").value,
-                fecha_nacimiento: document.getElementById("edit_fecha").value,
                 telefono: document.getElementById("edit_telefono").value,
 
                 obra_social: document.getElementById("edit_obra_social").value,
@@ -494,7 +542,18 @@
                 vacunas: document.getElementById("edit_vacunas").value,
                 gestas: document.getElementById("edit_gestas").value,
                 medico_cabecera: document.getElementById("edit_medico_cabecera").value,
-                fim_descriptivo: document.getElementById("edit_fim_descriptivo").value
+                fim_descriptivo: document.getElementById("edit_fim_descriptivo").value,
+
+                peso: getValueNumber("edit_peso"),
+                talla: getValueNumber("edit_talla"),
+                ocupacion: document.getElementById("edit_ocupacion").value,
+                diagnostico_principal: document.getElementById("edit_diagnostico_principal").value,
+                habitos: document.getElementById("edit_habitos").value,
+                medicacion_habitual: document.getElementById("edit_medicacion_habitual").value,
+                cirugias: document.getElementById("edit_cirugias").value,
+                transfusiones: document.getElementById("edit_transfusiones").value,
+                antecedentes_personales: document.getElementById("edit_antecedentes_personales").value,
+                antecedentes_familiares: document.getElementById("edit_antecedentes_familiares").value
             };
 
             const res = await fetch(`/pacientes/${window.pacienteEditando}`, {

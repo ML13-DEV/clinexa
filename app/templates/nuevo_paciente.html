@@ -88,6 +88,37 @@
 
         <textarea id="fim_descriptivo" class="form-control mb-3" placeholder="FIM descriptivo"></textarea>
 
+        <hr>
+
+        <!-- 🩺 DATOS CLÍNICOS -->
+        <h5 class="mb-3">Datos clínicos</h5>
+
+        <div class="row g-2">
+            <div class="col-12 col-md-4">
+                <input id="peso" type="number" step="0.1" class="form-control" placeholder="Peso (kg)" oninput="actualizarImc()">
+            </div>
+            <div class="col-12 col-md-4">
+                <input id="talla" type="number" step="0.1" class="form-control" placeholder="Talla (cm)" oninput="actualizarImc()">
+            </div>
+            <div class="col-12 col-md-4">
+                <input id="imc" class="form-control" placeholder="IMC" readonly>
+            </div>
+        </div>
+
+        <div class="row g-2 mt-1">
+            <div class="col-12 col-md-6">
+                <input id="ocupacion" class="form-control" placeholder="Ocupación">
+            </div>
+        </div>
+
+        <textarea id="diagnostico_principal" class="form-control mb-2 mt-2" placeholder="Diagnóstico principal"></textarea>
+        <textarea id="habitos" class="form-control mb-2" placeholder="Hábitos"></textarea>
+        <textarea id="medicacion_habitual" class="form-control mb-2" placeholder="Medicación habitual"></textarea>
+        <textarea id="cirugias" class="form-control mb-2" placeholder="Cirugías"></textarea>
+        <textarea id="transfusiones" class="form-control mb-2" placeholder="Transfusiones"></textarea>
+        <textarea id="antecedentes_personales" class="form-control mb-2" placeholder="Antecedentes personales"></textarea>
+        <textarea id="antecedentes_familiares" class="form-control mb-3" placeholder="Antecedentes familiares"></textarea>
+
         <div class="text-end">
             <button class="btn btn-success w-100 w-md-auto" onclick="crearPaciente()">
                 Guardar paciente
@@ -108,6 +139,20 @@
             window.location.href = "/login";
         }
 
+        function calcularImc(peso, talla) {
+            if (!peso || !talla) return null;
+            const tallaM = talla / 100;
+            if (tallaM <= 0) return null;
+            return Math.round((peso / (tallaM * tallaM)) * 100) / 100;
+        }
+
+        function actualizarImc() {
+            const peso = parseFloat(document.getElementById("peso").value);
+            const talla = parseFloat(document.getElementById("talla").value);
+            const imc = calcularImc(peso, talla);
+            document.getElementById("imc").value = imc ?? "";
+        }
+
         function mostrarToast(msg, tipo="success") {
 
             const toast = document.createElement("div");
@@ -122,6 +167,11 @@
             }, 2500);
         }
 
+
+        function getValueNumber(id) {
+            const valor = document.getElementById(id).value;
+            return valor === "" ? null : parseFloat(valor);
+        }
 
         async function crearPaciente() {
 
@@ -141,7 +191,18 @@
                 vacunas: document.getElementById("vacunas").value,
                 gestas: document.getElementById("gestas").value,
                 medico_cabecera: document.getElementById("medico_cabecera").value,
-                fim_descriptivo: document.getElementById("fim_descriptivo").value
+                fim_descriptivo: document.getElementById("fim_descriptivo").value,
+
+                peso: getValueNumber("peso"),
+                talla: getValueNumber("talla"),
+                diagnostico_principal: document.getElementById("diagnostico_principal").value,
+                ocupacion: document.getElementById("ocupacion").value,
+                habitos: document.getElementById("habitos").value,
+                medicacion_habitual: document.getElementById("medicacion_habitual").value,
+                cirugias: document.getElementById("cirugias").value,
+                transfusiones: document.getElementById("transfusiones").value,
+                antecedentes_personales: document.getElementById("antecedentes_personales").value,
+                antecedentes_familiares: document.getElementById("antecedentes_familiares").value
             };
 
             const res = await fetch("/pacientes", {
