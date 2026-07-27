@@ -1278,7 +1278,10 @@
             const ordenado = [...data].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
             const labels = ordenado.map(a => soloFecha(a.fecha));
-            const valores = ordenado.map(a => a[campoActual]);
+            const valores = ordenado.map(a => {
+                const numero = parseFloat(a[campoActual]);
+                return Number.isNaN(numero) ? null : numero;
+            });
 
             if (chart) chart.destroy();
 
