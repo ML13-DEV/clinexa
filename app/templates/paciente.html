@@ -334,6 +334,71 @@
             `;
         }
 
+        function crearCardNumero(campo, titulo, valor) {
+
+            const contenido = (valor !== null && valor !== undefined && valor !== "")
+                ? valor
+                : "<span class='text-muted'>Sin datos</span>";
+
+            return `
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm border-0 p-3 h-100">
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">${titulo}</small>
+
+                            <button class="btn btn-sm btn-outline-warning"
+                                onclick="editarCampo('${campo}', \`${valor ?? ""}\`)">
+                                ✏️
+                            </button>
+                        </div>
+
+                        <div class="mt-2" id="valor-${campo}">
+                            ${contenido}
+                        </div>
+
+                        <div id="edit-${campo}" style="display:none;" class="mt-2">
+
+                            <input type="number" step="0.1" class="form-control mb-2" id="input-${campo}" value="${valor ?? ""}">
+
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-success btn-sm" onclick="guardarCampo('${campo}')">
+                                    Guardar
+                                </button>
+
+                                <button class="btn btn-secondary btn-sm" onclick="cancelarEdicion('${campo}')">
+                                    Cancelar
+                                </button>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            `;
+        }
+
+        function crearCardSoloLectura(titulo, valor) {
+
+            const contenido = (valor !== null && valor !== undefined && valor !== "")
+                ? valor
+                : "<span class='text-muted'>Sin datos</span>";
+
+            return `
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm border-0 p-3 h-100">
+
+                        <small class="text-muted">${titulo}</small>
+
+                        <div class="mt-2">
+                            ${contenido}
+                        </div>
+
+                    </div>
+                </div>
+            `;
+        }
+
         const pacienteId = "{{ id }}";
 
         async function cargarPaciente() {
@@ -377,6 +442,17 @@
                 ${crearCard("gestas", "Gestas", data.paciente.gestas)}
                 ${crearCard("medico_cabecera", "Médico de cabecera", data.paciente.medico_cabecera)}
                 ${crearCard("fim_descriptivo", "FIM descriptivo", data.paciente.fim_descriptivo)}
+                ${crearCardNumero("peso", "Peso (kg)", data.paciente.peso)}
+                ${crearCardNumero("talla", "Talla (cm)", data.paciente.talla)}
+                ${crearCardSoloLectura("IMC", data.paciente.imc)}
+                ${crearCard("diagnostico_principal", "Diagnóstico principal", data.paciente.diagnostico_principal)}
+                ${crearCard("ocupacion", "Ocupación", data.paciente.ocupacion)}
+                ${crearCard("habitos", "Hábitos", data.paciente.habitos)}
+                ${crearCard("medicacion_habitual", "Medicación habitual", data.paciente.medicacion_habitual)}
+                ${crearCard("cirugias", "Cirugías", data.paciente.cirugias)}
+                ${crearCard("transfusiones", "Transfusiones", data.paciente.transfusiones)}
+                ${crearCard("antecedentes_personales", "Antecedentes personales", data.paciente.antecedentes_personales)}
+                ${crearCard("antecedentes_familiares", "Antecedentes familiares", data.paciente.antecedentes_familiares)}
             `;
 
             // =========================
@@ -714,12 +790,17 @@
                 return;
             }
 
+            if ((campo === "peso" || campo === "talla") && (isNaN(valor) || Number(valor) <= 0)) {
+                mostrarToast("Valor numérico inválido ❌", "danger");
+                return;
+            }
+
             // =========================
             // 🔹 REQUEST
             // =========================
 
             const payload = {};
-            payload[campo] = valor;
+            payload[campo] = (campo === "peso" || campo === "talla") ? Number(valor) : valor;
 
             const res = await fetch(`/pacientes/${pacienteId}`, {
                 method: "PUT",
