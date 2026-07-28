@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/styles.css">
     <script src="/static/js/darkmode.js"></script>
+    <script src="/static/js/especialidades.js"></script>
 
     <script>
         if (!localStorage.getItem("token")) {
@@ -78,15 +79,12 @@
         <!-- 🩸 DATOS MÉDICOS -->
         <h5 class="mb-3">Datos médicos</h5>
 
-        <textarea id="sangrados" class="form-control mb-2" placeholder="Sangrados"></textarea>
-        <textarea id="trombosis" class="form-control mb-2" placeholder="Trombosis"></textarea>
         <textarea id="alergias" class="form-control mb-2" placeholder="Alergias"></textarea>
-        <textarea id="vacunas" class="form-control mb-2" placeholder="Vacunas"></textarea>
-        <textarea id="gestas" class="form-control mb-2" placeholder="Gestas"></textarea>
-
         <input id="medico_cabecera" class="form-control mb-2" placeholder="Médico de cabecera">
 
-        <textarea id="fim_descriptivo" class="form-control mb-3" placeholder="FIM descriptivo"></textarea>
+        <!-- Campos específicos de la especialidad del médico logueado,
+             se arman en tiempo de carga (ver /especialidades/campos). -->
+        <div id="camposEspecialidad" class="mb-2"></div>
 
         <hr>
 
@@ -132,6 +130,7 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             aplicarModo();
+            cargarCamposEspecialidad("camposEspecialidad");
         });
 
         function logout() {
@@ -185,13 +184,9 @@
                 obra_social: document.getElementById("obra_social").value,
                 numero_afiliado: document.getElementById("numero_afiliado").value,
 
-                sangrados: document.getElementById("sangrados").value,
-                trombosis: document.getElementById("trombosis").value,
                 alergias: document.getElementById("alergias").value,
-                vacunas: document.getElementById("vacunas").value,
-                gestas: document.getElementById("gestas").value,
                 medico_cabecera: document.getElementById("medico_cabecera").value,
-                fim_descriptivo: document.getElementById("fim_descriptivo").value,
+                datos_clinicos: leerCamposEspecialidad("camposEspecialidad"),
 
                 peso: getValueNumber("peso"),
                 talla: getValueNumber("talla"),

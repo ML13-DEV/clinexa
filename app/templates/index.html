@@ -6,6 +6,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/static/js/darkmode.js"></script>
+    <script src="/static/js/especialidades.js"></script>
     <link rel="stylesheet" href="/static/css/styles.css">
     <script>
         const token = localStorage.getItem("token");
@@ -86,13 +87,11 @@
                     <input id="edit_obra_social" class="form-control mb-2" placeholder="Obra social">
                     <input id="edit_numero_afiliado" class="form-control mb-2" placeholder="Número afiliado">
 
-                    <textarea id="edit_sangrados" class="form-control mb-2" placeholder="Sangrados"></textarea>
-                    <textarea id="edit_trombosis" class="form-control mb-2" placeholder="Trombosis"></textarea>
                     <textarea id="edit_alergias" class="form-control mb-2" placeholder="Alergias"></textarea>
-                    <textarea id="edit_vacunas" class="form-control mb-2" placeholder="Vacunas"></textarea>
-                    <textarea id="edit_gestas" class="form-control mb-2" placeholder="Gestas"></textarea>
                     <textarea id="edit_medico_cabecera" class="form-control mb-2" placeholder="Médico de cabecera"></textarea>
-                    <textarea id="edit_fim_descriptivo" class="form-control mb-2" placeholder="FIM descriptivo"></textarea>
+
+                    <!-- Campos específicos de la especialidad del médico logueado -->
+                    <div id="camposEspecialidadModal" class="mb-2"></div>
 
                     <div class="row g-2 mb-2">
                         <div class="col-4">
@@ -193,6 +192,7 @@
                 }
             });
             const data = await res.json();
+            const lista = document.getElementById("lista");
 
             if (data.length === 0) {
                 lista.innerHTML = `
@@ -202,8 +202,6 @@
                 `;
                 return;
             }
-
-            const lista = document.getElementById("lista");
             lista.innerHTML = "";
 
             data.forEach(p => {
@@ -482,13 +480,10 @@
             document.getElementById("edit_telefono").value = p.telefono || "";
             document.getElementById("edit_obra_social").value = p.obra_social || "";
             document.getElementById("edit_numero_afiliado").value = p.numero_afiliado || "";
-            document.getElementById("edit_sangrados").value = p.sangrados || "";
-            document.getElementById("edit_trombosis").value = p.trombosis || "";
             document.getElementById("edit_alergias").value = p.alergias || "";
-            document.getElementById("edit_vacunas").value = p.vacunas || "";
-            document.getElementById("edit_gestas").value = p.gestas || "";
             document.getElementById("edit_medico_cabecera").value = p.medico_cabecera || "";
-            document.getElementById("edit_fim_descriptivo").value = p.fim_descriptivo || "";
+
+            await cargarCamposEspecialidad("camposEspecialidadModal", p.datos_clinicos || {});
 
             document.getElementById("edit_peso").value = p.peso ?? "";
             document.getElementById("edit_talla").value = p.talla ?? "";
@@ -536,13 +531,9 @@
                 obra_social: document.getElementById("edit_obra_social").value,
                 numero_afiliado: document.getElementById("edit_numero_afiliado").value,
 
-                sangrados: document.getElementById("edit_sangrados").value,
-                trombosis: document.getElementById("edit_trombosis").value,
                 alergias: document.getElementById("edit_alergias").value,
-                vacunas: document.getElementById("edit_vacunas").value,
-                gestas: document.getElementById("edit_gestas").value,
                 medico_cabecera: document.getElementById("edit_medico_cabecera").value,
-                fim_descriptivo: document.getElementById("edit_fim_descriptivo").value,
+                datos_clinicos: leerCamposEspecialidad("camposEspecialidadModal"),
 
                 peso: getValueNumber("edit_peso"),
                 talla: getValueNumber("edit_talla"),

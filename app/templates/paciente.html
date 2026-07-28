@@ -57,12 +57,6 @@
                     <input id="edit_dni" class="form-control" placeholder="DNI">
                 </div>
                 <div class="col-12 col-md-4">
-                    <textarea id="edit_sangrados" class="form-control" placeholder="Sangrados"></textarea>
-                </div>
-                <div class="col-12 col-md-4">
-                    <textarea id="edit_trombosis" class="form-control" placeholder="Trombosis"></textarea>
-                </div>
-                <div class="col-12 col-md-4">
                     <textarea id="edit_alergias" class="form-control" placeholder="Alergias"></textarea>
                 </div>
             </div>
@@ -494,7 +488,25 @@
 
         const pacienteId = "{{ id }}";
 
+        // Campos clínicos de la especialidad del médico logueado (ver
+        // GET /especialidades/campos). Se cachea acá porque guardarCampo
+        // necesita saber si un campo es de datos_clinicos (JSONB, requiere
+        // mergear con lo existente) o una columna fija (PUT directo).
+        let camposEspecialidad = [];
+        let datosClinicosActuales = {};
+
+        async function cargarCamposEspecialidadCatalogo() {
+            const res = await fetch("/especialidades/campos", {
+                headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
+            });
+            camposEspecialidad = res.ok ? await res.json() : [];
+        }
+
         async function cargarPaciente() {
+            if (!camposEspecialidad.length) {
+                await cargarCamposEspecialidadCatalogo();
+            }
+
             const res = await fetch(`/pacientes/${pacienteId}`, {
                 headers: {
                     "Authorization": "Bearer " + localStorage.getItem("token")
@@ -502,6 +514,8 @@
             });
             const data = await res.json();
             await cargarAnalisis();
+
+            datosClinicosActuales = data.paciente.datos_clinicos || {};
 
             document.getElementById("nombre").innerText =
                 data.paciente.nombre + " " + data.paciente.apellido;
@@ -517,8 +531,6 @@
             document.getElementById("edit_apellido").value = data.paciente.apellido || "";
             document.getElementById("edit_dni").value = data.paciente.dni || "";
 
-            document.getElementById("edit_sangrados").value = data.paciente.sangrados || "";
-            document.getElementById("edit_trombosis").value = data.paciente.trombosis || "";
             document.getElementById("edit_alergias").value = data.paciente.alergias || "";
             
             // =========================
@@ -527,14 +539,14 @@
 
             const datosMedicos = document.getElementById("datosMedicos");
 
+            const cardsEspecialidad = camposEspecialidad
+                .map(campo => crearCard(campo.key, campo.label, datosClinicosActuales[campo.key]))
+                .join("");
+
             datosMedicos.innerHTML = `
-               ${crearCard("sangrados", "Sangrados", data.paciente.sangrados)}
-                ${crearCard("trombosis", "Trombosis", data.paciente.trombosis)}
                 ${crearCard("alergias", "Alergias", data.paciente.alergias)}
-                ${crearCard("vacunas", "Vacunas", data.paciente.vacunas)}
-                ${crearCard("gestas", "Gestas", data.paciente.gestas)}
                 ${crearCard("medico_cabecera", "Médico de cabecera", data.paciente.medico_cabecera)}
-                ${crearCard("fim_descriptivo", "FIM descriptivo", data.paciente.fim_descriptivo)}
+                ${cardsEspecialidad}
                 ${crearCardNumero("peso", "Peso (kg)", data.paciente.peso)}
                 ${crearCardNumero("talla", "Talla (cm)", data.paciente.talla)}
                 ${crearCardSoloLectura("IMC", data.paciente.imc)}
@@ -718,9 +730,6 @@
                 nombre: document.getElementById("edit_nombre").value,
                 apellido: document.getElementById("edit_apellido").value,
                 dni: document.getElementById("edit_dni").value,
-
-                sangrados: document.getElementById("edit_sangrados").value,
-                trombosis: document.getElementById("edit_trombosis").value,
                 alergias: document.getElementById("edit_alergias").value
             };
 
@@ -789,8 +798,14 @@
             // 🔹 REQUEST
             // =========================
 
-            const payload = {};
-            payload[campo] = (campo === "peso" || campo === "talla") ? Number(valor) : valor;
+            // Los campos de la especialidad viven en datos_clinicos (JSONB),
+            // no son columnas propias: hay que mandar el objeto completo
+            // mergeado, no solo la key que se está editando.
+            const esCampoEspecialidad = camposEspecialidad.some(c => c.key === campo);
+
+            const payload = esCampoEspecialidad
+                ? { datos_clinicos: { ...datosClinicosActuales, [campo]: valor } }
+                : { [campo]: (campo === "peso" || campo === "talla") ? Number(valor) : valor };
 
             const res = await fetch(`/pacientes/${pacienteId}`, {
                 method: "PUT",
