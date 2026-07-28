@@ -1,13 +1,15 @@
 from pydantic import BaseModel
 
+from app.models.usuario import RolUsuario
+
 class LoginSchema(BaseModel):
     username: str
     password: str
-    
+
 class UsuarioCreate(BaseModel):
     username: str
     password: str
-    rol: str
+    rol: RolUsuario
     especialidad: str | None = None
 
 
