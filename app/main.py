@@ -3,8 +3,6 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
-from dotenv import load_dotenv
-
 from app.database import Base, engine
 
 # MODELOS
@@ -17,9 +15,6 @@ from app.models.analisis import Analisis
 # ROUTES
 from app.routes import pacientes, turnos, notas, auth, analisis
 from app.routes import admin
-
-from dotenv import load_dotenv
-load_dotenv()
 
 Base.metadata.create_all(bind=engine)
 

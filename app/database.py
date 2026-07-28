@@ -1,12 +1,19 @@
 import os
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+# Se carga acá (no en main.py) para garantizar que .env esté leído antes de
+# el os.getenv de abajo, sin depender del orden de imports de quien use esto.
+# override=True: que el .env del proyecto gane sobre variables de entorno
+# que puedan estar seteadas a nivel de sistema (de otro proyecto, por ej.).
+load_dotenv(override=True)
+
 # 1. Leemos la URL de la base de datos desde las variables de entorno.
-# Si no existe (en tu PC), usa SQLite por defecto.
-#DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./med.db")
-DATABASE_URL =  "sqlite:///./med.db"
+# SQLite es solo un fallback para poder correr local sin Supabase a mano;
+# staging/producción siempre deben tener DATABASE_URL seteada.
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./med.db")
 
 # 2. Ajuste para PostgreSQL (Render/Railway a veces mandan postgres:// y SQLAlchemy pide postgresql://)
 if DATABASE_URL.startswith("postgres://"):
