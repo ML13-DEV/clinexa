@@ -17,7 +17,16 @@ if DATABASE_URL.startswith("postgres://"):
 if "sqlite" in DATABASE_URL:
     engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 else:
-    engine = create_engine(DATABASE_URL)
+    # pool_pre_ping evita errores por conexiones "muertas" que el pooler
+    # de Supabase (Supavisor) puede cerrar por inactividad.
+    # pool_size/max_overflow chicos porque el Session Pooler ya maneja
+    # el pooling real de conexiones hacia Postgres.
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True,
+        pool_size=5,
+        max_overflow=5,
+    )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

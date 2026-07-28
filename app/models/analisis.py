@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, DateTime, ForeignKey, String
+from sqlalchemy import Column, Integer, Float, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
@@ -16,7 +16,7 @@ class Analisis(Base):
     nt = Column(Float, nullable=True)
     l = Column(Float, nullable=True)
     hb = Column(Float, nullable=True)
-    htd = Column(Float, nullable=True)
+    hto = Column(Float, nullable=True)
     vcm = Column(Float, nullable=True)
     pqts = Column(Float, nullable=True)
 
@@ -30,14 +30,18 @@ class Analisis(Base):
     epo = Column(Float, nullable=True)
     vit_b12 = Column(Float, nullable=True)
     af = Column(Float, nullable=True)
+    ldh = Column(Float, nullable=True)
 
     # 🧪 FUNCIONES
-    hepatograma = Column(String(100), nullable=True)
-    funcion_renal = Column(String(100), nullable=True)
+    hepatograma = Column(String(255), nullable=True)
+    funcion_renal = Column(String(255), nullable=True)
 
     # 🧪 COAGULACIÓN
     tp = Column(Float, nullable=True)
     kptt = Column(Float, nullable=True)
     rino = Column(Float, nullable=True)
+
+    # 🧪 LIBRE
+    otros_analisis = Column(Text, nullable=True)
 
     paciente = relationship("Paciente")

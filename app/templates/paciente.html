@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Paciente</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/styles.css">
@@ -13,15 +13,16 @@
     </script>
 </head>
 
-<body class="container mt-4">
+<body class="container-fluid py-4">
+    <div class="container">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <a href="/" class="btn btn-outline-secondary">← Volver</a>
 
-        <div class="d-flex gap-2">
-            <button onclick="logout()" class="btn btn-danger">Salir</button>
+        <div class="d-flex flex-column flex-md-row gap-2">
+            <button onclick="logout()" class="btn btn-danger w-100 w-md-auto">Salir</button>
 
-            <button class="btn btn-sm btn-secondary" onclick="toggleDarkMode()">
+            <button class="btn btn-sm btn-secondary w-100 w-md-auto" onclick="toggleDarkMode()">
                 🌙
             </button>
         </div>
@@ -29,30 +30,42 @@
 
     
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-3">
 
         <div>
             <h1 id="nombre"></h1>
             <p id="edad"></p>
         </div>
 
-        <button class="btn btn-warning" onclick="mostrarEdicion()">
+        <button class="btn btn-warning w-10 w-md-auto" onclick="mostrarEdicion()">
             Editar
         </button>
 
-        </div>
+    </div>
 
-            <div id="formEditar" style="display:none;" class="card p-4 mb-4">
+    <div id="formEditar" style="display:none;" class="card p-4 mb-4">
 
             <h5>Editar paciente</h5>
-
-            <input id="edit_nombre" class="form-control mb-2" placeholder="Nombre">
-            <input id="edit_apellido" class="form-control mb-2" placeholder="Apellido">
-            <input id="edit_dni" class="form-control mb-2" placeholder="DNI">
-
-            <textarea id="edit_sangrados" class="form-control mb-2" placeholder="Sangrados"></textarea>
-            <textarea id="edit_trombosis" class="form-control mb-2" placeholder="Trombosis"></textarea>
-            <textarea id="edit_alergias" class="form-control mb-2" placeholder="Alergias"></textarea>
+            <div class="row g-2">
+                <div class="col-12 col-md-4">
+                    <input id="edit_nombre" class="form-control" placeholder="Nombre">
+                </div>
+                <div class="col-12 col-md-4">
+                    <input id="edit_apellido" class="form-control" placeholder="Apellido">
+                </div>
+                <div class="col-12 col-md-4">
+                    <input id="edit_dni" class="form-control" placeholder="DNI">
+                </div>
+                <div class="col-12 col-md-4">
+                    <textarea id="edit_sangrados" class="form-control" placeholder="Sangrados"></textarea>
+                </div>
+                <div class="col-12 col-md-4">
+                    <textarea id="edit_trombosis" class="form-control" placeholder="Trombosis"></textarea>
+                </div>
+                <div class="col-12 col-md-4">
+                    <textarea id="edit_alergias" class="form-control" placeholder="Alergias"></textarea>
+                </div>
+            </div>
 
             <button class="btn btn-success mt-2" onclick="guardarEdicion()">
                 Guardar cambios
@@ -62,40 +75,42 @@
 
     <h3 class="mt-4">📋 Datos médicos</h3>
 
-    <div id="datosMedicos" class="row g-3"></div>
+    <div id="datosMedicos" class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3"></div>
 
     <h3>Nuevo Turno</h3>
 
-    <div class="mb-3">
-        <input id="fechaTurno" type="datetime-local" class="form-control mb-2">
-
-        <input id="motivo" class="form-control mb-2" placeholder="Motivo">
-
-        <button class="btn btn-success" onclick="crearTurno()">
-            Crear turno
-        </button>
+    <div class="card p-3 mb-3">
+        <div class="row g-2">
+            <div class="col-12 col-md-6">
+                <input id="fechaTurno" type="datetime-local" class="form-control">
+            </div>
+            <div class="col-12 col-md-6">
+                <input id="motivo" class="form-control" placeholder="Motivo">
+            </div>
+            <div class="col-12">
+                <button class="btn btn-success w-100 w-md-auto" onclick="crearTurno()">
+                    Crear turno
+                </button>
+            </div>
+        </div>
     </div>
 
-
-    <h3>Turnos</h3>
-    <div id="timelineTurnos" class="timeline"></div>
-
-    <div class="text-center mt-3">
-        <button id="btnVerMas" class="btn btn-outline-light" onclick="verMasTurnos()">
-            Ver más
-        </button>
-    </div>
 
     <h3>Notas</h3>
-    <div class="mb-3">
-        <textarea id="contenidoNota" class="form-control mb-2" placeholder="Escribir nota..."></textarea>
-
-        <button class="btn btn-success" onclick="crearNota()">
-            Agregar nota
-        </button>
+    <div class="card p-3 mb-3">
+        <div class="row g-2">
+            <div class="col-12">
+                <textarea id="contenidoNota" class="form-control" placeholder="Escribir nota..."></textarea>
+            </div>
+            <div class="col-12">
+                <button class="btn btn-success w-100 w-md-auto" onclick="crearNota()">
+                    Agregar nota
+                </button>
+            </div>
+        </div>
     </div>
 
-    <ul id="notas" class="list-group"></ul>
+    <div id="timelineNotas" class="timeline"></div>
 
     <div class="text-center mt-4 mb-4">
         <button id="btnVerMasNotas" class="btn btn-success" onclick="mostrarMasNotas()" style="display: none;">
@@ -112,156 +127,38 @@
         </div>
     </div>
 
-    <br>
+    <h3 class="mt-4">🧪 Análisis de sangre</h3>
 
-    <div class="card p-4 shadow-lg analisis-card">
-
-        <h2 class="mb-4">
-            🧪 Análisis de sangre
-        </h2>
-
-        <form id="formAnalisis">
-
-            <!-- HEMOGRAMA -->
-            <div class="bloque-analisis mb-4">
-
-                <h5 class="titulo-bloque">Hemograma</h5>
-
-                <div class="row g-3">
-
-                    <div class="col-12 col-md-3">
-                        <input type="date" id="fecha" class="form-control">
-                    </div>
-
-                    <div class="col-6 col-md-3">
-                        <input id="gb" class="form-control" placeholder="GB">
-                    </div>
-
-                    <div class="col-6 col-md-3">
-                        <input id="nt" class="form-control" placeholder="NT">
-                    </div>
-
-                    <div class="col-6 col-md-3">
-                        <input id="l" class="form-control" placeholder="L">
-                    </div>
-
-                    <div class="col-6 col-md-3">
-                        <input id="hb" class="form-control" placeholder="HB">
-                    </div>
-
-                    <div class="col-6 col-md-3">
-                        <input id="htd" class="form-control" placeholder="HTD">
-                    </div>
-
-                    <div class="col-6 col-md-3">
-                        <input id="vcm" class="form-control" placeholder="VCM">
-                    </div>
-
-                    <div class="col-6 col-md-3">
-                        <input id="pqts" class="form-control" placeholder="PQTS">
-                    </div>
-
-                </div>
+    <!-- 🔹 FORM -->
+    <div id="formAnalisis" class="card p-3 mb-3">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-2">
+            <div class="col"><input id="fechaAnalisis" type="date" class="form-control" placeholder="Fecha"></div>
+            <div class="col"><input id="gb" class="form-control" placeholder="GB"></div>
+            <div class="col"><input id="nt" class="form-control" placeholder="NT"></div>
+            <div class="col"><input id="l" class="form-control" placeholder="L"></div>
+            <div class="col"><input id="hb" class="form-control" placeholder="HB"></div>
+            <div class="col"><input id="hto" class="form-control" placeholder="HTO"></div>
+            <div class="col"><input id="vcm" class="form-control" placeholder="VCM"></div>
+            <div class="col"><input id="pqts" class="form-control" placeholder="PQTS"></div>
+            <div class="col"><input id="ferremia" class="form-control" placeholder="Ferremia"></div>
+            <div class="col"><input id="ferritina" class="form-control" placeholder="Ferritina"></div>
+            <div class="col"><input id="saturacion" class="form-control" placeholder="% Sat"></div>
+            <div class="col"><input id="tibc" class="form-control" placeholder="TIBC"></div>
+            <div class="col"><input id="epo" class="form-control" placeholder="EPO"></div>
+            <div class="col"><input id="vit_b12" class="form-control" placeholder="Vit B12"></div>
+            <div class="col"><input id="af" class="form-control" placeholder="AF"></div>
+            <div class="col"><input id="ldh" class="form-control" placeholder="LDH"></div>
+            <div class="col"><input id="tp" class="form-control" placeholder="TP"></div>
+            <div class="col"><input id="kptt" class="form-control" placeholder="KPTT"></div>
+            <div class="col"><input id="rino" class="form-control" placeholder="RIN"></div>
+            <div class="col"><input id="hepatograma" class="form-control" placeholder="Hepatograma"></div>
+            <div class="col"><input id="funcion_renal" class="form-control" placeholder="Función renal"></div>
+            <div class="col col-lg-6">
+                <textarea id="otros_analisis" class="form-control" placeholder="Otros análisis"></textarea>
             </div>
+        </div>
 
-            <!-- HIERRO -->
-            <div class="bloque-analisis mb-4">
-
-                <h5 class="titulo-bloque">Metabolismo del hierro</h5>
-
-                <div class="row g-3">
-
-                    <div class="col-6 col-md-3">
-                        <input id="ferremia" class="form-control" placeholder="Ferremia">
-                    </div>
-
-                    <div class="col-6 col-md-3">
-                        <input id="ferritina" class="form-control" placeholder="Ferritina">
-                    </div>
-
-                    <div class="col-6 col-md-3">
-                        <input id="saturacion" class="form-control" placeholder="% Saturación">
-                    </div>
-
-                    <div class="col-6 col-md-3">
-                        <input id="tibc" class="form-control" placeholder="TIBC">
-                    </div>
-
-                </div>
-            </div>
-
-            <!-- OTROS -->
-            <div class="bloque-analisis mb-4">
-
-                <h5 class="titulo-bloque">Otros estudios</h5>
-
-                <div class="row g-3">
-
-                    <div class="col-6 col-md-3">
-                        <input id="epo" class="form-control" placeholder="EPO">
-                    </div>
-
-                    <div class="col-6 col-md-3">
-                        <input id="vit_b12" class="form-control" placeholder="Vitamina B12">
-                    </div>
-
-                    <div class="col-6 col-md-3">
-                        <input id="af" class="form-control" placeholder="AF">
-                    </div>
-
-                </div>
-            </div>
-
-            <!-- COAGULACION -->
-            <div class="bloque-analisis mb-4">
-
-                <h5 class="titulo-bloque">Coagulación</h5>
-
-                <div class="row g-3">
-
-                    <div class="col-6 col-md-3">
-                        <input id="tp" class="form-control" placeholder="TP">
-                    </div>
-
-                    <div class="col-6 col-md-3">
-                        <input id="kptt" class="form-control" placeholder="KPTT">
-                    </div>
-
-                    <div class="col-6 col-md-3">
-                        <input id="rino" class="form-control" placeholder="RIN">
-                    </div>
-
-                </div>
-            </div>
-
-            <!-- OBSERVACIONES -->
-            <div class="bloque-analisis mb-4">
-
-                <h5 class="titulo-bloque">Observaciones</h5>
-
-                <div class="row g-3">
-
-                    <div class="col-12">
-                        <textarea id="hepatograma"
-                            class="form-control"
-                            rows="3"
-                            placeholder="Hepatograma"></textarea>
-                    </div>
-
-                    <div class="col-12">
-                        <textarea id="funcion_renal"
-                            class="form-control"
-                            rows="3"
-                            placeholder="Función renal"></textarea>
-                    </div>
-
-                </div>
-            </div>
-        </form>
-
-        <button class="btn btn-success w-100 py-3"
-            onclick="crearAnalisis()">
-
+        <button class="btn btn-success mt-3 w-100 w-md-auto" onclick="crearAnalisis()">
             Guardar análisis
         </button>
 
@@ -269,7 +166,7 @@
 
     <!-- 🔹 TABLA -->
     <!-- 🔹 TABLA CON SCROLL HORIZONTAL -->
-    <div id="tablaAnalisisParent" class="table-responsive mt-3" style="overflow-x: auto;">
+    <div id="tablaAnalisisParent" class="table-responsive mt-3">
         <table class="table table-dark table-striped table-hover text-center table-edit">
             <thead>
                 <tr>
@@ -278,7 +175,7 @@
                     <th onclick="cambiarGrafico('nt', this)">NT</th>
                     <th onclick="cambiarGrafico('l', this)">LLL</th>
                     <th onclick="cambiarGrafico('hb', this)">HB</th>
-                    <th onclick="cambiarGrafico('htd', this)">HTD</th>
+                    <th onclick="cambiarGrafico('hto', this)">HTO</th>
                     <th onclick="cambiarGrafico('vcm', this)">VCM</th>
                     <th onclick="cambiarGrafico('pqts', this)">PQTS</th>
                     <th onclick="cambiarGrafico('ferremia', this)">Ferrem</th>
@@ -288,11 +185,13 @@
                     <th onclick="cambiarGrafico('epo', this)">EPO</th>
                     <th onclick="cambiarGrafico('vit_b12', this)">B12</th>
                     <th onclick="cambiarGrafico('af', this)">AF</th>
+                    <th onclick="cambiarGrafico('ldh', this)">LDH</th>
                     <th onclick="cambiarGrafico('hepatograma', this)">Hep</th>
                     <th onclick="cambiarGrafico('funcion_renal', this)">Ren</th>
                     <th onclick="cambiarGrafico('tp', this)">TP</th>
                     <th onclick="cambiarGrafico('kptt', this)">KPTT</th>
                     <th onclick="cambiarGrafico('rino', this)">RIN</th>
+                    <th onclick="cambiarGrafico('otros_analisis', this)">Otros</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -309,8 +208,10 @@
 
     <br><br>
 
+    </div>
+
     <div class="modal fade" id="modalConfirm">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-fullscreen-sm-down">
             <div class="modal-content">
 
             <div class="modal-header">
@@ -320,8 +221,52 @@
             <div class="modal-body" id="modalTexto"></div>
 
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button class="btn btn-danger" id="btnConfirmarEliminar">Confirmar</button>
+                <button class="btn btn-secondary w-100 w-md-auto" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-danger w-100 w-md-auto" id="btnConfirmarEliminar">Confirmar</button>
+            </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalEditarNota" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+            <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Editar nota</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <textarea id="editNotaContenido" class="form-control" rows="6"></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary w-100 w-md-auto" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-success w-100 w-md-auto" onclick="guardarNotaEditada()">Guardar</button>
+            </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalEliminarNota" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+            <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Eliminar nota</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                ¿Eliminar esta nota? Esta acción no se puede deshacer.
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary w-100 w-md-auto" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-danger w-100 w-md-auto" onclick="confirmarEliminarNota()">Confirmar</button>
             </div>
 
             </div>
@@ -349,16 +294,68 @@
         let campoActual = "hb"; // default
         let chart = null;
 
-        let limiteTurnos = 3;
-        function verMasTurnos() {
-            limiteTurnos += 3; // Aumentamos de a 3
-            cargarPaciente();
+        // =========================
+        // 🎨 RANGOS NORMALES (a definir a futuro)
+        // =========================
+        // Estructura preparada para cargar los rangos normales de cada
+        // análisis más adelante. Mientras min/max sean null, colorearValor()
+        // no aplica ningún color (comportamiento actual sin cambios).
+        const RANGOS_NORMALES = {
+            gb: { min: null, max: null },
+            nt: { min: null, max: null },
+            l: { min: null, max: null },
+            hb: { min: null, max: null },
+            hto: { min: null, max: null },
+            vcm: { min: null, max: null },
+            pqts: { min: null, max: null },
+            ferremia: { min: null, max: null },
+            ferritina: { min: null, max: null },
+            saturacion: { min: null, max: null },
+            tibc: { min: null, max: null },
+            epo: { min: null, max: null },
+            vit_b12: { min: null, max: null },
+            af: { min: null, max: null },
+            ldh: { min: null, max: null },
+            tp: { min: null, max: null },
+            kptt: { min: null, max: null },
+            rino: { min: null, max: null }
+        };
+
+        // rojo = alto, azul = bajo, verde = normal.
+        // Devuelve la clase CSS a aplicar, o null si el campo no tiene rango
+        // normal definido todavía o el valor no es numérico.
+        function colorearValor(campo, valor) {
+            const rango = RANGOS_NORMALES[campo];
+            if (!rango || rango.min === null || rango.max === null) return null;
+
+            const numero = parseFloat(valor);
+            if (Number.isNaN(numero)) return null;
+
+            if (numero > rango.max) return "valor-alto";
+            if (numero < rango.min) return "valor-bajo";
+            return "valor-normal";
+        }
+
+        function celdaAnalisis(campo, valor) {
+            const clase = colorearValor(campo, valor);
+            const claseAttr = clase ? ` class="${clase}"` : "";
+            return `<td data-campo="${campo}"${claseAttr}>${valor ?? "-"}</td>`;
         }
 
         let limiteNotas = 3;
         function mostrarMasNotas() {
             limiteNotas += 3; // Aumentamos de a 3
             cargarPaciente(); // Volvemos a renderizar
+        }
+
+        let notasCache = [];
+        let notaEditandoId = null;
+        let notaEliminarId = null;
+
+        function escapeHtml(texto) {
+            const div = document.createElement("div");
+            div.innerText = texto ?? "";
+            return div.innerHTML;
         }
 
         function formatearFecha(fecha) {
@@ -396,7 +393,7 @@
                 <div class="col-md-4 mb-3">
                     <div class="card shadow-sm border-0 p-3 h-100">
 
-                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+                        <div class="d-flex justify-content-between align-items-center">
                             <small class="text-muted">${titulo}</small>
 
                             <button class="btn btn-sm btn-outline-warning"
@@ -423,6 +420,71 @@
                                 </button>
                             </div>
 
+                        </div>
+
+                    </div>
+                </div>
+            `;
+        }
+
+        function crearCardNumero(campo, titulo, valor) {
+
+            const contenido = (valor !== null && valor !== undefined && valor !== "")
+                ? valor
+                : "<span class='text-muted'>Sin datos</span>";
+
+            return `
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm border-0 p-3 h-100">
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">${titulo}</small>
+
+                            <button class="btn btn-sm btn-outline-warning"
+                                onclick="editarCampo('${campo}', \`${valor ?? ""}\`)">
+                                ✏️
+                            </button>
+                        </div>
+
+                        <div class="mt-2" id="valor-${campo}">
+                            ${contenido}
+                        </div>
+
+                        <div id="edit-${campo}" style="display:none;" class="mt-2">
+
+                            <input type="number" step="0.1" class="form-control mb-2" id="input-${campo}" value="${valor ?? ""}">
+
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-success btn-sm" onclick="guardarCampo('${campo}')">
+                                    Guardar
+                                </button>
+
+                                <button class="btn btn-secondary btn-sm" onclick="cancelarEdicion('${campo}')">
+                                    Cancelar
+                                </button>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            `;
+        }
+
+        function crearCardSoloLectura(titulo, valor) {
+
+            const contenido = (valor !== null && valor !== undefined && valor !== "")
+                ? valor
+                : "<span class='text-muted'>Sin datos</span>";
+
+            return `
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm border-0 p-3 h-100">
+
+                        <small class="text-muted">${titulo}</small>
+
+                        <div class="mt-2">
+                            ${contenido}
                         </div>
 
                     </div>
@@ -473,94 +535,55 @@
                 ${crearCard("gestas", "Gestas", data.paciente.gestas)}
                 ${crearCard("medico_cabecera", "Médico de cabecera", data.paciente.medico_cabecera)}
                 ${crearCard("fim_descriptivo", "FIM descriptivo", data.paciente.fim_descriptivo)}
+                ${crearCardNumero("peso", "Peso (kg)", data.paciente.peso)}
+                ${crearCardNumero("talla", "Talla (cm)", data.paciente.talla)}
+                ${crearCardSoloLectura("IMC", data.paciente.imc)}
+                ${crearCard("diagnostico_principal", "Diagnóstico principal", data.paciente.diagnostico_principal)}
+                ${crearCard("ocupacion", "Ocupación", data.paciente.ocupacion)}
+                ${crearCard("habitos", "Hábitos", data.paciente.habitos)}
+                ${crearCard("medicacion_habitual", "Medicación habitual", data.paciente.medicacion_habitual)}
+                ${crearCard("cirugias", "Cirugías", data.paciente.cirugias)}
+                ${crearCard("transfusiones", "Transfusiones", data.paciente.transfusiones)}
+                ${crearCard("antecedentes_personales", "Antecedentes personales", data.paciente.antecedentes_personales)}
+                ${crearCard("antecedentes_familiares", "Antecedentes familiares", data.paciente.antecedentes_familiares)}
             `;
 
             // =========================
-            // 📅 TURNOS
+            // 📝 NOTAS (timeline)
             // =========================
 
-            const contenedor = document.getElementById("timelineTurnos");
-            contenedor.innerHTML = "";
+            notasCache = data.notas;
 
-            if (data.turnos.length <= limiteTurnos) {
-                document.querySelector("#btnVerMas").style.display = "none";
-            }
+            const timelineNotas = document.getElementById("timelineNotas");
+            timelineNotas.innerHTML = "";
 
-            data.turnos.slice(0, limiteTurnos).forEach(t => {
+            data.notas.slice(0, limiteNotas).forEach(n => {
 
                 const div = document.createElement("div");
-                div.className = `timeline-item ${t.estado}`;
+                div.className = "timeline-item nota";
 
                 div.innerHTML = `
                     <div class="timeline-content">
 
-                        <div class="mb-1">
-                            <strong>${formatearFecha(t.fecha)}</strong>
-                        </div>
+                        <div class="d-flex justify-content-between align-items-start mb-1 gap-2">
+                            <strong>${formatearFecha(n.fecha)}</strong>
 
-                        <div><strong>Motivo:</strong> ${t.motivo}</div>
-                        <div><strong>Estado:</strong> ${t.estado}</div>
-
-                        ${
-                            t.estado === "atendido" ? `
-                                <div><strong>Diagnóstico:</strong> ${t.diagnostico || "-"}</div>
-                                <div><strong>Observaciones:</strong> ${t.observaciones || "-"}</div>
-                            ` : ""
-                        }
-
-                        ${
-                            t.estado === "pendiente" ? `
-                                <button class="btn btn-sm btn-success mt-2" onclick="mostrarFormulario(${t.id})">
-                                    Atender
-                                </button>
-
-                                <button class="btn btn-sm btn-warning mt-2 ms-2" onclick="editarTurno(${t.id}, '${t.motivo}', '${t.fecha}')">
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-warning" onclick="abrirModalEditarNota(${n.id})">
                                     ✏️
                                 </button>
-
-                                <button class="btn btn-sm btn-danger mt-2 ms-2" onclick="eliminarTurno(${t.id})">
+                                <button class="btn btn-sm btn-danger" onclick="abrirModalEliminarNota(${n.id})">
                                     🗑️
                                 </button>
+                            </div>
+                        </div>
 
-                                <!-- 🔥 FORMULARIO ATENDER -->
-                                <div id="form-${t.id}" style="display:none;" class="mt-2">
-                                    <input id="diag-${t.id}" class="form-control mb-1" placeholder="Diagnóstico">
-                                    <input id="obs-${t.id}" class="form-control mb-1" placeholder="Observaciones">
-
-                                    <button class="btn btn-primary btn-sm" onclick="guardarAtencion(${t.id})">
-                                        Guardar
-                                    </button>
-                                </div>
-                            ` : ""
-
-                        }
+                        <div class="nota-texto">${escapeHtml(n.contenido)}</div>
 
                     </div>
                 `;
 
-                contenedor.appendChild(div);
-            });
-                        
-
-            // =========================
-            // 📝 NOTAS
-            // =========================
-
-            const notas = document.getElementById("notas");
-            notas.innerHTML = "";
-
-            data.notas.slice(0, limiteNotas).forEach(n => {
-                const li = document.createElement("li");
-                li.className = "list-group-item bg-dark text-white border-secondary mb-1";
-                li.innerHTML = `
-                    <div class="d-flex justify-content-between">
-                        <div><strong>Nota:</strong></div>
-                        <small class="text-info">${formatearFecha(n.fecha)}</small>
-                    </div>
-                    <div class="mt-1">${n.contenido}</div>
-                `;
-
-                notas.appendChild(li);
+                timelineNotas.appendChild(div);
             });
 
             const btnNotas = document.getElementById("btnVerMasNotas");
@@ -582,10 +605,10 @@
                 : "<span class='text-muted'>Sin datos</span>";
 
             return `
-                <div class="col-12 col-md-6 col-xl-3">
+                <div class="col-md-4 mb-3">
                     <div class="card shadow-sm border-0 p-3 h-100">
 
-                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+                        <div class="d-flex justify-content-between align-items-center">
                             <small class="text-muted">${titulo}</small>
 
                             <button class="btn btn-sm btn-outline-warning"
@@ -689,45 +712,6 @@
             cargarPaciente();
         }
 
-        async function marcarAtendido(turnoId) {
-            await fetch(`/turnos/${turnoId}/atender`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + localStorage.getItem("token")
-                },
-                body: JSON.stringify({
-                    diagnostico: diagnostico,
-                    observaciones: observaciones
-                })
-            });
-
-            cargarPaciente(); // refresca la lista
-        }
-
-        function mostrarFormulario(turnoId) {
-            document.getElementById(`form-${turnoId}`).style.display = "block";
-        }
-
-        async function guardarAtencion(turnoId) {
-            const diagnostico = document.getElementById(`diag-${turnoId}`).value;
-            const observaciones = document.getElementById(`obs-${turnoId}`).value;
-
-            await fetch(`/turnos/${turnoId}/atender`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + localStorage.getItem("token")
-                },
-                body: JSON.stringify({
-                    diagnostico: diagnostico,
-                    observaciones: observaciones
-                })
-            });
-
-            cargarPaciente();
-        }
-
         async function guardarEdicion() {
 
             const paciente = {
@@ -752,11 +736,11 @@
             const data = await res.json();
 
             if (!res.ok) {
-                alert(data.detail || "Error ❌");
+                mostrarToast(data.detail || "Error ❌", "danger");
                 return;
             }
 
-            alert("Paciente actualizado ✏️");
+            mostrarToast("Paciente actualizado ✏️");
 
             // ocultar form
             document.getElementById("formEditar").style.display = "none";
@@ -796,12 +780,17 @@
                 return;
             }
 
+            if ((campo === "peso" || campo === "talla") && (isNaN(valor) || Number(valor) <= 0)) {
+                mostrarToast("Valor numérico inválido ❌", "danger");
+                return;
+            }
+
             // =========================
             // 🔹 REQUEST
             // =========================
 
             const payload = {};
-            payload[campo] = valor;
+            payload[campo] = (campo === "peso" || campo === "talla") ? Number(valor) : valor;
 
             const res = await fetch(`/pacientes/${pacienteId}`, {
                 method: "PUT",
@@ -828,52 +817,68 @@
             document.getElementById("formEditar").style.display = "block";
         }
 
-        function eliminarTurno(id) {
+        function abrirModalEditarNota(id) {
+            const nota = notasCache.find(n => n.id === id);
+            if (!nota) return;
 
-            mostrarConfirm("¿Eliminar turno?", async () => {
+            notaEditandoId = id;
+            document.getElementById("editNotaContenido").value = nota.contenido;
 
-                const res = await fetch(`/turnos/${id}`, {
-                    method: "DELETE",
-                    headers: {
-                        "Authorization": `Bearer ${localStorage.getItem("token")}`
-                    }
-                });
-
-                if (!res.ok) {
-                    mostrarToast("Error ❌", "danger");
-                    return;
-                }
-
-                mostrarToast("Turno eliminado 🗑");
-                cargarTurnosHoy();
-            });
+            new bootstrap.Modal(document.getElementById("modalEditarNota")).show();
         }
 
+        async function guardarNotaEditada() {
 
-        function editarTurno(id, motivo, fecha) {
+            const contenido = document.getElementById("editNotaContenido").value.trim();
 
-            const nuevoMotivo = prompt("Nuevo motivo:", motivo);
-            if (!nuevoMotivo) return;
+            if (!contenido) {
+                mostrarToast("La nota no puede estar vacía ❌", "danger");
+                return;
+            }
 
-            fetch(`/turnos/${id}`, {
+            const res = await fetch(`/notas/${notaEditandoId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": "Bearer " + localStorage.getItem("token")
                 },
-                body: JSON.stringify({
-                    motivo: nuevoMotivo,
-                    fecha: fecha
-                })
-            })
-            .then(res => {
-                if (!res.ok) throw new Error();
-                mostrarToast("Turno actualizado ✏️");
-                cargarPaciente();
-            })
-            .catch(() => {
-                mostrarToast("Error al editar ❌", "danger");
+                body: JSON.stringify({ contenido })
             });
+
+            if (!res.ok) {
+                mostrarToast("Error al actualizar la nota ❌", "danger");
+                return;
+            }
+
+            bootstrap.Modal.getInstance(document.getElementById("modalEditarNota")).hide();
+            mostrarToast("Nota actualizada ✏️");
+            cargarPaciente();
+        }
+
+        function abrirModalEliminarNota(id) {
+            notaEliminarId = id;
+            new bootstrap.Modal(document.getElementById("modalEliminarNota")).show();
+        }
+
+        async function confirmarEliminarNota() {
+
+            if (!notaEliminarId) return;
+
+            const res = await fetch(`/notas/${notaEliminarId}`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": "Bearer " + localStorage.getItem("token")
+                }
+            });
+
+            if (!res.ok) {
+                mostrarToast("Error al eliminar la nota ❌", "danger");
+                return;
+            }
+
+            bootstrap.Modal.getInstance(document.getElementById("modalEliminarNota")).hide();
+            mostrarToast("Nota eliminada 🗑");
+            cargarPaciente();
         }
 
         function cancelarEdicion(campo) {
@@ -917,29 +922,32 @@
 
                 row.innerHTML = `
                     <td data-campo="fecha">${soloFecha(a.fecha)}</td>
-                    <td data-campo="gb">${a.gb ?? "-"}</td>
-                    <td data-campo="nt">${a.nt ?? "-"}</td>
-                    <td data-campo="l">${a.l ?? "-"}</td>
-                    <td data-campo="hb">${a.hb ?? "-"}</td>
-                    <td data-campo="htd">${a.htd ?? "-"}</td>
-                    <td data-campo="vcm">${a.vcm ?? "-"}</td>
-                    <td data-campo="pqts">${a.pqts ?? "-"}</td>
+                    ${celdaAnalisis("gb", a.gb)}
+                    ${celdaAnalisis("nt", a.nt)}
+                    ${celdaAnalisis("l", a.l)}
+                    ${celdaAnalisis("hb", a.hb)}
+                    ${celdaAnalisis("hto", a.hto)}
+                    ${celdaAnalisis("vcm", a.vcm)}
+                    ${celdaAnalisis("pqts", a.pqts)}
 
-                    <td data-campo="ferremia">${a.ferremia ?? "-"}</td>
-                    <td data-campo="ferritina">${a.ferritina ?? "-"}</td>
-                    <td data-campo="saturacion">${a.saturacion ?? "-"}</td>
-                    <td data-campo="tibc">${a.tibc ?? "-"}</td>
+                    ${celdaAnalisis("ferremia", a.ferremia)}
+                    ${celdaAnalisis("ferritina", a.ferritina)}
+                    ${celdaAnalisis("saturacion", a.saturacion)}
+                    ${celdaAnalisis("tibc", a.tibc)}
 
-                    <td data-campo="epo">${a.epo ?? "-"}</td>
-                    <td data-campo="vit_b12">${a.vit_b12 ?? "-"}</td>
-                    <td data-campo="af">${a.af ?? "-"}</td>
+                    ${celdaAnalisis("epo", a.epo)}
+                    ${celdaAnalisis("vit_b12", a.vit_b12)}
+                    ${celdaAnalisis("af", a.af)}
+                    ${celdaAnalisis("ldh", a.ldh)}
 
                     <td data-campo="hepatograma">${a.hepatograma ?? "-"}</td>
                     <td data-campo="funcion_renal">${a.funcion_renal ?? "-"}</td>
 
-                    <td data-campo="tp">${a.tp ?? "-"}</td>
-                    <td data-campo="kptt">${a.kptt ?? "-"}</td>
-                    <td data-campo="rino">${a.rino ?? "-"}</td>
+                    ${celdaAnalisis("tp", a.tp)}
+                    ${celdaAnalisis("kptt", a.kptt)}
+                    ${celdaAnalisis("rino", a.rino)}
+
+                    <td data-campo="otros_analisis">${a.otros_analisis ?? "-"}</td>
 
                     <td>
                         <button class="btn btn-sm btn-warning" onclick="editarFila(this, ${a.id})">✏️</button>
@@ -963,8 +971,6 @@
                 console.warn("NO EXISTE INPUT:", id);
                 return null;
             }
-
-            console.log("Buscando:", id, el);
             return el.value === "" ? null : parseFloat(el.value);
         }
 
@@ -981,7 +987,7 @@
 
             console.log("ENTRÉ A CREAR ANALISIS");
 
-            const fechaInput = document.getElementById("fecha");
+            const fechaInput = document.getElementById("fechaAnalisis");
 
             // 🔥 fecha local segura (sin UTC)
             const hoy = new Date();
@@ -998,7 +1004,7 @@
                 nt: getValue("nt"),
                 l: getValue("l"),
                 hb: getValue("hb"),
-                htd: getValue("htd"),
+                hto: getValue("hto"),
                 vcm: getValue("vcm"),
                 pqts: getValue("pqts"),
 
@@ -1010,13 +1016,16 @@
                 epo: getValue("epo"),
                 vit_b12: getValue("vit_b12"),
                 af: getValue("af"),
+                ldh: getValue("ldh"),
 
                 hepatograma: getValueText("hepatograma"),
                 funcion_renal: getValueText("funcion_renal"),
 
                 tp: getValue("tp"),
                 kptt: getValue("kptt"),
-                rino: getValue("rino")
+                rino: getValue("rino"),
+
+                otros_analisis: getValueText("otros_analisis")
             };
 
             try {
@@ -1031,7 +1040,7 @@
                 });
 
                 if (!res.ok) {
-                    alert("Error al guardar ❌");
+                    mostrarToast("Error al guardar ❌", "danger");
                     return;
                 }
 
@@ -1055,7 +1064,7 @@
 
             } catch (error) {
                 console.error(error);
-                alert("Error inesperado al guardar ❌");
+                mostrarToast("Error inesperado al guardar ❌", "danger");
             }
         }
 
@@ -1098,7 +1107,7 @@
                 nt: parseNumber(inputs[1].value),
                 l: parseNumber(inputs[2].value),
                 hb: parseNumber(inputs[3].value),
-                htd: parseNumber(inputs[4].value),
+                hto: parseNumber(inputs[4].value),
                 vcm: parseNumber(inputs[5].value),
                 pqts: parseNumber(inputs[6].value),
                 ferritina: parseNumber(inputs[7].value),
@@ -1221,7 +1230,10 @@
             const ordenado = [...data].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
             const labels = ordenado.map(a => soloFecha(a.fecha));
-            const valores = ordenado.map(a => a[campoActual]);
+            const valores = ordenado.map(a => {
+                const numero = parseFloat(a[campoActual]);
+                return Number.isNaN(numero) ? null : numero;
+            });
 
             if (chart) chart.destroy();
 
@@ -1275,10 +1287,6 @@
         function editarFila(btn, id) {
 
             const fila = btn.closest("tr");
-
-            // 🔥 evitar editar dos veces
-            if (fila.dataset.editando === "true") return;
-
             fila.dataset.editando = "true";
 
             const celdas = fila.querySelectorAll("td[data-campo]");
@@ -1286,27 +1294,39 @@
             celdas.forEach(td => {
 
                 const campo = td.dataset.campo;
-                const valor = td.innerText;
+                let valor = td.innerText;
 
+                // 🔥 limpiar "-"
+                if (valor === "-") valor = "";
+
+                // 🔥 FECHA
                 if (campo === "fecha") {
+
+                    const fechaFormateada = formatoInputFecha(valor);
 
                     td.innerHTML = `
                         <input 
-                            type="date"
-                            class="form-control"
-                            value="${formatoInputFecha(valor)}"
-                        >
-                    `;
-
-                } else {
-
-                    td.innerHTML = `
-                        <input
-                            class="form-control"
-                            value="${valor === "-" ? "" : valor}"
+                            type="date" 
+                            class="form-control form-control-sm"
+                            value="${fechaFormateada}"
                         >
                     `;
                 }
+                // 🔥 CAMPOS DE TEXTO LARGO (texto libre)
+                else if (["hepatograma", "funcion_renal", "otros_analisis"].includes(campo)) {
+                    td.innerHTML = `
+                        <textarea class="form-control form-control-sm">${valor}</textarea>
+                    `;
+                }
+
+                // 🔥 CAMPOS NUMÉRICOS
+                else {
+                    td.innerHTML = `
+                        <input type="number" class="form-control form-control-sm"
+                        value="${valor}">
+                    `;
+                }
+
             });
 
             toggleBotones(fila, true);
@@ -1334,8 +1354,8 @@
                     data[campo] = valor;
                 }
 
-                // 🔥 TEXTOS
-                else if (["hepatograma", "funcion_renal"].includes(campo)) {
+                // 🔥 TEXTOS (texto libre)
+                else if (["hepatograma", "funcion_renal", "otros_analisis"].includes(campo)) {
                     data[campo] = valor;
                 }
 
@@ -1373,25 +1393,14 @@
             }
         }
 
-        async function cancelarEdicionFila(btn) {
-
-            const fila = btn.closest("tr");
-
-            // 🔥 sacar modo edición
-            fila.dataset.editando = "false";
-
-            // 🔥 recargar tabla completa
-            await cargarAnalisis();
+        function cancelarEdicionFila(btn) {
+            cargarAnalisis(); // vuelve todo a estado original
         }
 
         function toggleBotones(fila, editando) {
-
-            const botones = fila.querySelectorAll("button");
-
-            botones[0].classList.toggle("d-none", editando); // editar
-            botones[1].classList.toggle("d-none", !editando); // guardar
-            botones[2].classList.toggle("d-none", !editando); // cancelar
-            botones[3].classList.toggle("d-none", editando); // eliminar
+            fila.querySelector(".btn-warning").classList.toggle("d-none", editando);
+            fila.querySelector(".btn-success").classList.toggle("d-none", !editando);
+            fila.querySelector(".btn-secondary").classList.toggle("d-none", !editando);
         }
 
         function formatoInputFecha(fechaTexto) {
@@ -1407,40 +1416,6 @@
 
             return `${anio}-${mes.padStart(2, "0")}-${dia.padStart(2, "0")}`;
         }
-
-        function confirmar(msg, callback) {
-
-        document.getElementById("modalTexto").innerText = msg;
-
-        const btn = document.getElementById("btnConfirmar");
-
-        btn.onclick = () => {
-            callback();
-            bootstrap.Modal.getInstance(document.getElementById("modalConfirm")).hide();
-        };
-
-        new bootstrap.Modal(document.getElementById("modalConfirm")).show();
-    }
-
-    function mostrarConfirm(mensaje, callbackConfirm) {
-
-        const modalEl = document.getElementById("confirmModal");
-        const modal = new bootstrap.Modal(modalEl);
-
-        document.getElementById("confirmText").innerText = mensaje;
-
-        const btn = document.getElementById("confirmBtn");
-
-        // 🔥 limpiar eventos anteriores
-        btn.onclick = null;
-
-        btn.onclick = () => {
-            callbackConfirm();
-            modal.hide();
-        };
-
-        modal.show();
-    }
 
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

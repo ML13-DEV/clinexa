@@ -9,7 +9,7 @@ class AnalisisCreate(BaseModel):
     nt: float | None = None
     l: float | None = None
     hb: float | None = None
-    htd: float | None = None
+    hto: float | None = None
     vcm: float | None = None
     pqts: float | None = None
 
@@ -21,6 +21,7 @@ class AnalisisCreate(BaseModel):
     epo: float | None = None
     vit_b12: float | None = None
     af: float | None = None
+    ldh: float | None = None
 
     hepatograma: str | None = None
     funcion_renal: str | None = None
@@ -28,7 +29,9 @@ class AnalisisCreate(BaseModel):
     tp: float | None = None
     kptt: float | None = None
     rino: float | None = None
-    
+
+    otros_analisis: str | None = None
+
 
 class AnalisisUpdate(BaseModel):
     fecha: datetime | None = None
@@ -36,7 +39,7 @@ class AnalisisUpdate(BaseModel):
     nt: float | None = None
     l: float | None = None
     hb: float | None = None
-    htd: float | None = None
+    hto: float | None = None
     vcm: float | None = None
     pqts: float | None = None
 
@@ -48,6 +51,7 @@ class AnalisisUpdate(BaseModel):
     epo: float | None = None
     vit_b12: float | None = None
     af: float | None = None
+    ldh: float | None = None
 
     hepatograma: str | None = None
     funcion_renal: str | None = None
@@ -55,3 +59,5 @@ class AnalisisUpdate(BaseModel):
     tp: float | None = None
     kptt: float | None = None
     rino: float | None = None
+
+    otros_analisis: str | None = None

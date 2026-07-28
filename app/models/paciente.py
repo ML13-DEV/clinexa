@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, Text
+from sqlalchemy import Column, Integer, String, Date, Text, Float
 from app.database import Base
 from sqlalchemy.orm import relationship
 
@@ -12,7 +12,7 @@ class Paciente(Base):
     apellido = Column(String(100), nullable=False)
     dni = Column(String(20), unique=True, index=True)
     fecha_nacimiento = Column(Date)
-    telefono = Column(String(20))
+    telefono = Column(String(30))
 
     # Obra social
     obra_social = Column(String(100))
@@ -26,6 +26,19 @@ class Paciente(Base):
     gestas = Column(Text)
     medico_cabecera = Column(String(100))
     fim_descriptivo = Column(Text)
+
+    # Datos clínicos (antropometría, historia clínica)
+    peso = Column(Float)
+    talla = Column(Float)
+    imc = Column(Float)
+    diagnostico_principal = Column(Text)
+    ocupacion = Column(String(150))
+    habitos = Column(Text)
+    medicacion_habitual = Column(Text)
+    cirugias = Column(Text)
+    transfusiones = Column(Text)
+    antecedentes_personales = Column(Text)
+    antecedentes_familiares = Column(Text)
 
     # Relaciones
     turnos = relationship("Turno", back_populates="paciente")

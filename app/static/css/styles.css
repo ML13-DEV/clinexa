@@ -203,10 +203,19 @@ body.dark-mode {
     background-color: #22c55e;
 }
 
+.timeline-item.nota::before {
+    background-color: #3b82f6;
+}
+
 .timeline-content {
     background: #f8f9fa;
     padding: 12px;
     border-radius: 10px;
+}
+
+.timeline-content .nota-texto {
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 .dark-mode .timeline-content {
@@ -281,11 +290,41 @@ body.dark-mode {
 
 .table-responsive {
     overflow-x: auto;
+    max-width: 100%;
 }
 
 table {
-    min-width: 1200px;
-    font-size: 14px;
+    width: 100%;
+    min-width: unset;
+}
+
+.modal-dialog {
+    max-width: 100%;
+}
+
+@media (max-width: 575px) {
+    .modal-dialog {
+        margin: 0.75rem;
+    }
+    .timeline {
+        margin-left: 0;
+        padding-left: 10px;
+    }
+    .timeline-item::before {
+        left: -7px;
+    }
+}
+
+@media (min-width: 768px) {
+    .btn.w-md-auto,
+    .btn.w-sm-auto,
+    .btn.w-auto,
+    .d-flex > .btn,
+    .d-flex > a.btn {
+        width: auto !important;
+        min-width: auto !important;
+        max-width: none !important;
+    }
 }
 
 .dark-mode table {
@@ -417,28 +456,29 @@ input:-webkit-autofill:active {
     width: 100%;
     overflow-x: auto; /* Habilita el scroll horizontal */
     border-radius: 8px;
+    min-width: 0;
 }
 
 .table-edit {
-    min-width: 1800px !important; /* Ajusta este valor según cuánto espacio quieras */
-    table-layout: fixed; /* Ayuda a que los anchos de columna se respeten */
+    width: 100%;
+    min-width: 100%;
+    table-layout: auto;
 }
 
 /* Controlamos el ancho individual de las columnas */
 .table-edit th, .table-edit td {
-    width: 80px; /* Ancho estándar para columnas de números */
-    min-width: 80px;
+    width: auto;
+    min-width: 70px;
     padding: 8px 4px !important;
+    white-space: nowrap;
 }
 
 /* La columna de fecha y acciones suelen necesitar un poco más de espacio */
 .table-edit th:first-child, .table-edit td:first-child {
-    width: 120px;
     min-width: 120px;
 }
 
 .table-edit th:last-child, .table-edit td:last-child {
-    width: 100px;
     min-width: 100px;
 }
 
@@ -462,4 +502,24 @@ input:-webkit-autofill:active {
 
 textarea.form-control {
     resize: vertical;
+}
+
+/* =========================
+   🎨 COLOR DE VALORES DE ANÁLISIS
+   (rangos normales a definir a futuro, ver colorearValor() en paciente.html)
+========================= */
+
+.valor-alto {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+.valor-bajo {
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+.valor-normal {
+    color: #22c55e;
+    font-weight: 600;
 }
