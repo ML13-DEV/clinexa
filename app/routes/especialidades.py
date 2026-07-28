@@ -1,10 +1,17 @@
 from fastapi import APIRouter, Depends
 
 from app.core.dependencies import get_current_user
-from app.especialidades.config import campos_de
+from app.especialidades.config import campos_de, CAMPOS_POR_ESPECIALIDAD
 from app.especialidades.analisis_config import analisis_de
 
 router = APIRouter()
+
+
+@router.get("/especialidades")
+def listar_especialidades(user = Depends(get_current_user)):
+    """Keys de especialidades conocidas por el catálogo (ver
+    app/especialidades/config.py), para el selector del panel owner."""
+    return list(CAMPOS_POR_ESPECIALIDAD.keys())
 
 
 @router.get("/especialidades/campos")

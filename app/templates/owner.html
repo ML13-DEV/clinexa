@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Owner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="/static/js/darkmode.js"></script>
+    <script>
+        if (!localStorage.getItem("token")) {
+            window.location.href = "/login";
+        }
+    </script>
+</head>
+
+<body class="container-fluid py-4">
+    <div class="container">
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+            <h2>Panel Owner</h2>
+
+            <div class="d-flex gap-2">
+                <button onclick="logout()" class="btn btn-danger">Salir</button>
+                <button class="btn btn-sm btn-secondary" onclick="toggleDarkMode()">🌙</button>
+            </div>
+        </div>
+
+        <div class="card p-4 mb-4">
+            <h5 class="mb-3">Nuevo médico</h5>
+
+            <div class="row g-2">
+                <div class="col-12 col-md-3">
+                    <input id="nuevo_username" class="form-control" placeholder="Usuario">
+                </div>
+                <div class="col-12 col-md-3">
+                    <input id="nuevo_password" type="password" class="form-control" placeholder="Contraseña">
+                </div>
+                <div class="col-12 col-md-3">
+                    <select id="nuevo_especialidad" class="form-control"></select>
+                </div>
+                <div class="col-12 col-md-3">
+                    <button class="btn btn-success w-100" onclick="crearMedico()">Crear médico</button>
+                </div>
+            </div>
+        </div>
+
+        <h5 class="mb-3">Médicos</h5>
+
+        <div class="table-responsive">
+            <table class="table table-dark table-striped table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Especialidad</th>
+                        <th>Pacientes</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaMedicos"></tbody>
+            </table>
+        </div>
+
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
+            <div id="toast" class="toast align-items-center text-white bg-success border-0">
+                <div class="d-flex">
+                    <div class="toast-body" id="toastBody"></div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function logout() {
+            localStorage.removeItem("token");
+            window.location.href = "/login";
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            aplicarModo();
+            init();
+        });
+
+        function mostrarToast(msg, tipo = "success") {
+            const toastEl = document.getElementById("toast");
+            const toastBody = document.getElementById("toastBody");
+            toastBody.innerText = msg;
+            toastEl.className = `toast align-items-center text-white bg-${tipo} border-0`;
+            new bootstrap.Toast(toastEl).show();
+        }
+
+        function authHeaders(extra = {}) {
+            return { "Authorization": "Bearer " + localStorage.getItem("token"), ...extra };
+        }
+
+        let especialidadesDisponibles = [];
+
+        // Si la especialidad actual del usuario no está en el catálogo (ej.
+        // "sistema" para el propio owner), se agrega igual como opción para
+        // que el select refleje el valor real en vez de mostrar la primera
+        // opción del catálogo por default.
+        function opcionesEspecialidad(actual) {
+            const opciones = especialidadesDisponibles.includes(actual)
+                ? especialidadesDisponibles
+                : [actual, ...especialidadesDisponibles];
+
+            return opciones.map(esp =>
+                `<option value="${esp}" ${esp === actual ? "selected" : ""}>${esp}</option>`
+            ).join("");
+        }
+
+        async function init() {
+            const res = await fetch("/especialidades", { headers: authHeaders() });
+            especialidadesDisponibles = res.ok ? await res.json() : [];
+
+            const select = document.getElementById("nuevo_especialidad");
+            select.innerHTML = especialidadesDisponibles
+                .map(esp => `<option value="${esp}">${esp}</option>`)
+                .join("");
+
+            await cargarMedicos();
+        }
+
+        async function cargarMedicos() {
+            const res = await fetch("/owner/usuarios", { headers: authHeaders() });
+
+            if (res.status === 403) {
+                // No es owner: no tiene nada que hacer acá.
+                window.location.href = "/";
+                return;
+            }
+
+            const medicos = await res.json();
+            const tabla = document.getElementById("tablaMedicos");
+
+            tabla.innerHTML = medicos.map(m => `
+                <tr>
+                    <td>${m.username}</td>
+                    <td>
+                        <select class="form-control form-control-sm" onchange="reasignarEspecialidad(${m.id}, this.value)">
+                            ${opcionesEspecialidad(m.especialidad)}
+                        </select>
+                    </td>
+                    <td class="text-center">${m.cantidad_pacientes}</td>
+                    <td>
+                        <span class="badge ${m.activo ? "bg-success" : "bg-secondary"}">
+                            ${m.activo ? "Activo" : "Inactivo"}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm ${m.activo ? "btn-warning" : "btn-success"}"
+                            onclick="toggleActivo(${m.id}, ${!m.activo})">
+                            ${m.activo ? "Desactivar" : "Activar"}
+                        </button>
+                    </td>
+                </tr>
+            `).join("");
+        }
+
+        async function crearMedico() {
+            const username = document.getElementById("nuevo_username").value.trim();
+            const password = document.getElementById("nuevo_password").value;
+            const especialidad = document.getElementById("nuevo_especialidad").value;
+
+            if (!username || !password) {
+                mostrarToast("Completá usuario y contraseña ❌", "danger");
+                return;
+            }
+
+            const res = await fetch("/owner/usuarios", {
+                method: "POST",
+                headers: authHeaders({ "Content-Type": "application/json" }),
+                body: JSON.stringify({ username, password, rol: "medico", especialidad })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                mostrarToast(data.detail || "Error al crear médico ❌", "danger");
+                return;
+            }
+
+            mostrarToast("Médico creado ✅");
+            document.getElementById("nuevo_username").value = "";
+            document.getElementById("nuevo_password").value = "";
+
+            await cargarMedicos();
+        }
+
+        async function actualizarMedico(id, cambios) {
+            const res = await fetch(`/owner/usuarios/${id}`, {
+                method: "PUT",
+                headers: authHeaders({ "Content-Type": "application/json" }),
+                body: JSON.stringify(cambios)
+            });
+
+            if (!res.ok) {
+                mostrarToast("Error al actualizar ❌", "danger");
+                return;
+            }
+
+            mostrarToast("Actualizado ✅");
+            await cargarMedicos();
+        }
+
+        function toggleActivo(id, nuevoValor) {
+            actualizarMedico(id, { activo: nuevoValor });
+        }
+
+        function reasignarEspecialidad(id, especialidad) {
+            actualizarMedico(id, { especialidad });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

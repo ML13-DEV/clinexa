@@ -15,7 +15,7 @@ from app.models.rango_normal import RangoNormal
 
 # ROUTES
 from app.routes import pacientes, turnos, notas, auth, analisis, especialidades
-from app.routes import admin
+from app.routes import owner
 
 Base.metadata.create_all(bind=engine)
 
@@ -26,7 +26,7 @@ app.include_router(turnos.router)
 app.include_router(notas.router)
 app.include_router(analisis.router)
 app.include_router(auth.router)
-app.include_router(admin.router)
+app.include_router(owner.router)
 app.include_router(especialidades.router)
 
 templates = Jinja2Templates(directory="app/templates")
