@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app.models.nota import Nota
 from app.schemas.nota import NotaCreate, NotaUpdate
 from app.auth import get_current_user
+from app.core.permissions import get_paciente_propio, get_registro_de_paciente_propio
 
 router = APIRouter(
     dependencies=[Depends(get_current_user)]
@@ -23,7 +24,11 @@ def crear_nota(
     db: Session = Depends(get_db),
     user = Depends(get_current_user)
     ):
-    
+
+    # Valida que el paciente exista y sea del médico logueado antes de
+    # dejarle colgar una nota de cualquier paciente_id.
+    get_paciente_propio(db, nota.paciente_id, user["id"])
+
     nueva_nota = Nota(**nota.dict())
     db.add(nueva_nota)
     db.commit()
@@ -39,10 +44,7 @@ def actualizar_nota(
     user = Depends(get_current_user)
     ):
 
-    nota = db.query(Nota).filter(Nota.id == id).first()
-
-    if not nota:
-        raise HTTPException(status_code=404, detail="Nota no encontrada")
+    nota = get_registro_de_paciente_propio(db, Nota, id, user["id"], detail="Nota no encontrada")
 
     cambios = data.dict(exclude_unset=True)
 
@@ -62,10 +64,7 @@ def eliminar_nota(
     user = Depends(get_current_user)
     ):
 
-    nota = db.query(Nota).filter(Nota.id == id).first()
-
-    if not nota:
-        raise HTTPException(status_code=404, detail="Nota no encontrada")
+    nota = get_registro_de_paciente_propio(db, Nota, id, user["id"], detail="Nota no encontrada")
 
     db.delete(nota)
     db.commit()
