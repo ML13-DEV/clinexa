@@ -13,7 +13,7 @@ from app.models.nota import Nota
 from app.models.analisis import Analisis
 
 # ROUTES
-from app.routes import pacientes, turnos, notas, auth, analisis
+from app.routes import pacientes, turnos, notas, auth, analisis, especialidades
 from app.routes import admin
 
 Base.metadata.create_all(bind=engine)
@@ -26,6 +26,7 @@ app.include_router(notas.router)
 app.include_router(analisis.router)
 app.include_router(auth.router)
 app.include_router(admin.router)
+app.include_router(especialidades.router)
 
 templates = Jinja2Templates(directory="app/templates")
 

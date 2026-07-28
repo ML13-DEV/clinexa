@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Date, Text, Float, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Date, Text, Float, ForeignKey, UniqueConstraint, JSON
+from sqlalchemy.dialects.postgresql import JSONB
 from app.database import Base
 from sqlalchemy.orm import relationship
 
@@ -30,14 +31,20 @@ class Paciente(Base):
     obra_social = Column(String(100))
     numero_afiliado = Column(String(100))
 
-    # Datos médicos
-    sangrados = Column(Text)
-    trombosis = Column(Text)
+    # Datos médicos comunes a cualquier especialidad
     alergias = Column(Text)
-    vacunas = Column(Text)
-    gestas = Column(Text)
     medico_cabecera = Column(String(100))
-    fim_descriptivo = Column(Text)
+
+    # Campos específicos de la especialidad del médico dueño (ver
+    # app/especialidades/config.py para qué keys son válidas por
+    # especialidad). Ej. hematología: sangrados, trombosis, gestas,
+    # vacunas, fim_descriptivo.
+    datos_clinicos = Column(
+        JSONB().with_variant(JSON(), "sqlite"),
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
 
     # Datos clínicos (antropometría, historia clínica)
     peso = Column(Float)

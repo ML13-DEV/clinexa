@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import date
 
 class PacienteBase(BaseModel):
@@ -10,13 +10,8 @@ class PacienteBase(BaseModel):
     obra_social: str | None = None
     numero_afiliado: str | None = None
 
-    sangrados: str | None = None
-    trombosis: str | None = None
     alergias: str | None = None
-    vacunas: str | None = None
-    gestas: str | None = None
     medico_cabecera: str | None = None
-    fim_descriptivo: str | None = None
 
     peso: float | None = None
     talla: float | None = None
@@ -28,6 +23,11 @@ class PacienteBase(BaseModel):
     transfusiones: str | None = None
     antecedentes_personales: str | None = None
     antecedentes_familiares: str | None = None
+
+    # Campos específicos de la especialidad del médico (ver
+    # app/especialidades/config.py), ej. hematología: sangrados,
+    # trombosis, gestas, vacunas, fim_descriptivo.
+    datos_clinicos: dict = Field(default_factory=dict)
 
 
 class PacienteCreate(PacienteBase):
@@ -43,13 +43,8 @@ class PacienteUpdate(BaseModel):
     obra_social: str | None = None
     numero_afiliado: str | None = None
 
-    sangrados: str | None = None
-    trombosis: str | None = None
     alergias: str | None = None
-    vacunas: str | None = None
-    gestas: str | None = None
     medico_cabecera: str | None = None
-    fim_descriptivo: str | None = None
 
     peso: float | None = None
     talla: float | None = None
@@ -61,6 +56,8 @@ class PacienteUpdate(BaseModel):
     transfusiones: str | None = None
     antecedentes_personales: str | None = None
     antecedentes_familiares: str | None = None
+
+    datos_clinicos: dict | None = None
 
 
 class PacienteResponse(PacienteBase):

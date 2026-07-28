@@ -11,6 +11,7 @@ from app.models.nota import Nota
 from app.schemas.paciente import PacienteCreate, PacienteUpdate
 from app.core.permissions import get_paciente_propio
 from app.core.dependencies import get_db, get_current_user
+from app.especialidades.config import validar_datos_clinicos
 
 router = APIRouter()
 
@@ -69,6 +70,11 @@ def crear_paciente(
 
     if existente:
         raise HTTPException(status_code=400, detail="DNI ya registrado")
+
+    try:
+        validar_datos_clinicos(user["especialidad"], paciente.datos_clinicos)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     nuevo = Paciente(**paciente.dict(), usuario_id=user["id"])
     nuevo.imc = calcular_imc(nuevo.peso, nuevo.talla)
@@ -152,6 +158,12 @@ def actualizar_paciente(
         )
         if existente and existente.id != id:
             raise HTTPException(status_code=400, detail="DNI ya registrado")
+
+    if "datos_clinicos" in cambios:
+        try:
+            validar_datos_clinicos(user["especialidad"], cambios["datos_clinicos"])
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
 
     for key, value in cambios.items():
         setattr(paciente, key, value)
