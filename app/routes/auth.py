@@ -3,10 +3,10 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
-from app.database import get_db
+from app.core.dependencies import get_db
+from app.core.security import verify_password, crear_token
 from app.models.usuario import Usuario
 from app.schemas.usuario import LoginSchema
-from app.auth import verify_password, crear_token
 
 router = APIRouter()
 

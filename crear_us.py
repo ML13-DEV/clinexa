@@ -1,4 +1,4 @@
-from app.auth import hash_password
+from app.core.security import hash_password
 from app.database import SessionLocal
 from app.models.usuario import Usuario
 

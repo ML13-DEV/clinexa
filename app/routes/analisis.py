@@ -1,23 +1,14 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from app.database import SessionLocal
 from app.models.analisis import Analisis
 
 from app.schemas.analisis import AnalisisCreate, AnalisisUpdate
-from app.auth import get_current_user
 from app.core.permissions import get_paciente_propio, get_registro_de_paciente_propio
+from app.core.dependencies import get_db, get_current_user
 
 router = APIRouter(
     dependencies=[Depends(get_current_user)]
 )
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.post("/analisis")

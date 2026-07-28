@@ -5,29 +5,16 @@ from sqlalchemy import func, or_
 from datetime import datetime, date
 from pydantic import BaseModel
 
-from app.database import SessionLocal
 from app.models.paciente import Paciente
 from app.models.turnos import Turno
 from app.schemas.turnos import TurnoCreate
 
-from app.auth import get_current_user
 from app.core.permissions import get_paciente_propio
+from app.core.dependencies import get_db, get_current_user
 
 router = APIRouter(
     dependencies=[Depends(get_current_user)]
 )
-
-
-# =========================
-# DB
-# =========================
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 # =========================
 # CREAR TURNO
