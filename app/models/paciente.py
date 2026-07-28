@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, Text, Float
+from sqlalchemy import Column, Integer, String, Date, Text, Float, ForeignKey
 from app.database import Base
 from sqlalchemy.orm import relationship
 
@@ -6,6 +6,12 @@ class Paciente(Base):
     __tablename__ = "pacientes"
 
     id = Column(Integer, primary_key=True, index=True)
+
+    # Dueño del registro: el médico que lo creó. Todas las queries de
+    # pacientes/notas/turnos/analisis deben filtrar por esta columna
+    # (directa o transitivamente vía paciente_id) para que un médico
+    # nunca vea pacientes de otro.
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False, index=True)
 
     # Datos personales
     nombre = Column(String(100), nullable=False)
