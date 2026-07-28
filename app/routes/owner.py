@@ -6,8 +6,10 @@ from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_db, get_current_owner
 from app.core.security import hash_password
+from app.models.analisis import Analisis
+from app.models.nota import Nota
 from app.models.paciente import Paciente
-from app.models.usuario import Usuario
+from app.models.usuario import RolUsuario, Usuario
 from app.schemas.usuario import UsuarioCreate, UsuarioOut, UsuarioUpdate
 
 router = APIRouter(prefix="/owner", tags=["Owner"])
@@ -115,3 +117,70 @@ def actualizar_usuario(
     db.refresh(usuario)
 
     return _con_cantidad_pacientes(db, usuario)
+
+
+@router.get("/estadisticas")
+def obtener_estadisticas(
+    db: Session = Depends(get_db),
+    owner = Depends(get_current_owner)
+):
+    """Números agregados de toda la plataforma para el panel owner: solo
+    COUNT/GROUP BY, nunca se traen filas completas ni se toca contenido
+    clínico (datos_clinicos, notas.contenido, analisis_valores.valor) —
+    el owner gestiona médicos, no ve historias clínicas."""
+
+    medicos_total = (
+        db.query(func.count(Usuario.id))
+        .filter(Usuario.rol == RolUsuario.MEDICO)
+        .scalar()
+    )
+    medicos_activos = (
+        db.query(func.count(Usuario.id))
+        .filter(Usuario.rol == RolUsuario.MEDICO, Usuario.activo.is_(True))
+        .scalar()
+    )
+    medicos_por_especialidad = dict(
+        db.query(Usuario.especialidad, func.count(Usuario.id))
+        .filter(Usuario.rol == RolUsuario.MEDICO)
+        .group_by(Usuario.especialidad)
+        .all()
+    )
+
+    pacientes_total = db.query(func.count(Paciente.id)).scalar()
+    pacientes_por_especialidad = dict(
+        db.query(Usuario.especialidad, func.count(Paciente.id))
+        .select_from(Paciente)
+        .join(Usuario, Paciente.usuario_id == Usuario.id)
+        .group_by(Usuario.especialidad)
+        .all()
+    )
+
+    notas_total = db.query(func.count(Nota.id)).scalar()
+
+    analisis_total = db.query(func.count(Analisis.id)).scalar()
+    analisis_por_especialidad = dict(
+        db.query(Usuario.especialidad, func.count(Analisis.id))
+        .select_from(Analisis)
+        .join(Paciente, Analisis.paciente_id == Paciente.id)
+        .join(Usuario, Paciente.usuario_id == Usuario.id)
+        .group_by(Usuario.especialidad)
+        .all()
+    )
+
+    return {
+        "medicos": {
+            "total": medicos_total,
+            "activos": medicos_activos,
+            "inactivos": medicos_total - medicos_activos,
+            "por_especialidad": medicos_por_especialidad,
+        },
+        "pacientes": {
+            "total": pacientes_total,
+            "por_especialidad": pacientes_por_especialidad,
+        },
+        "notas": {"total": notas_total},
+        "analisis": {
+            "total": analisis_total,
+            "por_especialidad": analisis_por_especialidad,
+        },
+    }
