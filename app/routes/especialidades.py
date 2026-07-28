@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.core.dependencies import get_current_user
 from app.especialidades.config import campos_de
+from app.especialidades.analisis_config import analisis_de
 
 router = APIRouter()
 
@@ -19,4 +20,20 @@ def obtener_campos_especialidad(user = Depends(get_current_user)):
             "opciones": list(campo.opciones),
         }
         for campo in campos_de(user["especialidad"])
+    ]
+
+
+@router.get("/especialidades/analisis")
+def obtener_analisis_especialidad(user = Depends(get_current_user)):
+    """Determinaciones de laboratorio/estudios del panel de análisis de la
+    especialidad del médico logueado, para armar dinámicamente el form,
+    la tabla y el gráfico de evolución en paciente.html."""
+    return [
+        {
+            "key": campo.key,
+            "label": campo.label,
+            "tipo": campo.tipo.value,
+            "unidad": campo.unidad,
+        }
+        for campo in analisis_de(user["especialidad"])
     ]
