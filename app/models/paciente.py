@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, Text, Float, ForeignKey, UniqueConstraint, JSON
+from sqlalchemy import Column, Integer, String, Date, DateTime, Text, Float, ForeignKey, UniqueConstraint, JSON, func
 from sqlalchemy.dialects.postgresql import JSONB
 from app.database import Base
 from sqlalchemy.orm import relationship
@@ -19,6 +19,8 @@ class Paciente(Base):
     # (directa o transitivamente vía paciente_id) para que un médico
     # nunca vea pacientes de otro.
     usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False, index=True)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Datos personales
     nombre = Column(String(100), nullable=False)

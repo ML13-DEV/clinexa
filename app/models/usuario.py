@@ -1,6 +1,6 @@
 from enum import Enum
 
-from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, func
 
 from app.database import Base
 
@@ -29,3 +29,5 @@ class Usuario(Base):
     especialidad = Column(String(100), nullable=True)
 
     activo = Column(Boolean, default=True)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
