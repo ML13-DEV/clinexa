@@ -40,6 +40,41 @@ CAMPOS_POR_ESPECIALIDAD: dict[str, list[CampoClinico]] = {
         CampoClinico("vacunas", "Vacunas", TipoCampo.TEXTAREA),
         CampoClinico("fim_descriptivo", "FIM (descriptivo)", TipoCampo.TEXTAREA),
     ],
+    "nutricion": [
+        CampoClinico("objetivo_peso", "Objetivo de peso (kg)", TipoCampo.NUMERO),
+        CampoClinico(
+            "actividad_fisica", "Actividad física", TipoCampo.SELECT,
+            opciones=("sedentario", "leve", "moderada", "intensa"),
+        ),
+        CampoClinico("alergias_alimentarias", "Alergias alimentarias", TipoCampo.TEXTAREA),
+        CampoClinico("plan_alimentario", "Plan alimentario", TipoCampo.TEXTAREA),
+        CampoClinico("suplementacion", "Suplementación", TipoCampo.TEXTAREA),
+        CampoClinico(
+            "antecedentes_gastrointestinales", "Antecedentes gastrointestinales", TipoCampo.TEXTAREA
+        ),
+    ],
+    "cardiologia": [
+        CampoClinico("factores_riesgo_cv", "Factores de riesgo cardiovascular", TipoCampo.TEXTAREA),
+        CampoClinico(
+            "clase_funcional_nyha", "Clase funcional NYHA", TipoCampo.SELECT,
+            opciones=("I", "II", "III", "IV"),
+        ),
+        CampoClinico(
+            "antecedentes_cardiovasculares", "Antecedentes cardiovasculares", TipoCampo.TEXTAREA
+        ),
+        CampoClinico("ecg_basal", "ECG basal", TipoCampo.TEXTAREA),
+        CampoClinico("tratamiento_cardiologico", "Tratamiento cardiológico", TipoCampo.TEXTAREA),
+    ],
+    "neurologia": [
+        CampoClinico("antecedentes_neurologicos", "Antecedentes neurológicos", TipoCampo.TEXTAREA),
+        CampoClinico(
+            "tipo_cefalea", "Tipo de cefalea", TipoCampo.SELECT,
+            opciones=("tensional", "migraña", "cluster", "otra"),
+        ),
+        CampoClinico("escala_funcional", "Escala funcional (ej. Rankin)", TipoCampo.TEXTO),
+        CampoClinico("medicacion_neurologica", "Medicación neurológica", TipoCampo.TEXTAREA),
+        CampoClinico("estudios_imagen", "Estudios de imagen", TipoCampo.TEXTAREA),
+    ],
 }
 
 
