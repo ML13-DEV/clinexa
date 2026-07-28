@@ -7,7 +7,7 @@ db = SessionLocal()
 user = Usuario(
     username="admin",
     password=hash_password("1234"),
-    rol="admin",
+    rol="owner",
     especialidad="sistema"
 )
 
