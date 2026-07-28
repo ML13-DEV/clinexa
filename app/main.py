@@ -10,7 +10,8 @@ from app.models.usuario import Usuario
 from app.models.paciente import Paciente
 from app.models.turnos import Turno
 from app.models.nota import Nota
-from app.models.analisis import Analisis
+from app.models.analisis import Analisis, AnalisisValor
+from app.models.rango_normal import RangoNormal
 
 # ROUTES
 from app.routes import pacientes, turnos, notas, auth, analisis, especialidades
