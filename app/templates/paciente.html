@@ -256,27 +256,26 @@
         let analisisTexto = new Set();
 
         // =========================
-        // 🎨 RANGOS NORMALES (a definir a futuro)
+        // 🎨 RANGOS NORMALES
         // =========================
-        // Estructura preparada para cargar los rangos normales de cada
-        // análisis más adelante. Se arma dinámicamente a partir del
-        // catálogo de la especialidad; mientras min/max sean null,
-        // colorearValor() no aplica ningún color (comportamiento actual
-        // sin cambios).
+        // Se arma dinámicamente pidiendo /especialidades/analisis/rangos.
+        // Un campo sin rango cargado (o cuyo min/max no aplica, ej. HDL solo
+        // tiene piso) queda con esa punta en null; colorearValor() trata
+        // null como "no comparar ese lado", no como "no colorear nada".
         let RANGOS_NORMALES = {};
 
         // rojo = alto, azul = bajo, verde = normal.
-        // Devuelve la clase CSS a aplicar, o null si el campo no tiene rango
-        // normal definido todavía o el valor no es numérico.
+        // Devuelve la clase CSS a aplicar, o null si el campo no tiene
+        // ningún límite cargado todavía o el valor no es numérico.
         function colorearValor(campo, valor) {
             const rango = RANGOS_NORMALES[campo];
-            if (!rango || rango.min === null || rango.max === null) return null;
+            if (!rango || (rango.min === null && rango.max === null)) return null;
 
             const numero = parseFloat(valor);
             if (Number.isNaN(numero)) return null;
 
-            if (numero > rango.max) return "valor-alto";
-            if (numero < rango.min) return "valor-bajo";
+            if (rango.max !== null && numero > rango.max) return "valor-alto";
+            if (rango.min !== null && numero < rango.min) return "valor-bajo";
             return "valor-normal";
         }
 
@@ -453,16 +452,27 @@
         }
 
         async function cargarAnalisisEspecialidadCatalogo() {
-            const res = await fetch("/especialidades/analisis", {
-                headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
-            });
-            analisisEspecialidad = res.ok ? await res.json() : [];
+            const headers = { "Authorization": "Bearer " + localStorage.getItem("token") };
+
+            const [resAnalisis, resRangos] = await Promise.all([
+                fetch("/especialidades/analisis", { headers }),
+                fetch("/especialidades/analisis/rangos", { headers }),
+            ]);
+
+            analisisEspecialidad = resAnalisis.ok ? await resAnalisis.json() : [];
             analisisTexto = new Set(
                 analisisEspecialidad.filter(c => c.tipo === "texto").map(c => c.key)
             );
 
+            const rangosCargados = resRangos.ok ? await resRangos.json() : [];
+            const rangosPorKey = Object.fromEntries(
+                rangosCargados.map(r => [r.key, { min: r.valor_min, max: r.valor_max }])
+            );
+            // Todo campo del catálogo arranca en null/null (sin colorear);
+            // se pisa con lo que haya vuelto de /rangos para las keys que sí
+            // tengan un valor de referencia cargado.
             RANGOS_NORMALES = Object.fromEntries(
-                analisisEspecialidad.map(c => [c.key, { min: null, max: null }])
+                analisisEspecialidad.map(c => [c.key, rangosPorKey[c.key] ?? { min: null, max: null }])
             );
 
             const primerNumerico = analisisEspecialidad.find(c => c.tipo !== "texto");
