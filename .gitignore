@@ -13,3 +13,6 @@ app/med.db
 # Archivos de sistema
 .DS_Store
 Thumbs.db
+
+# Tests
+.pytest_cache/
