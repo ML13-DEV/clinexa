@@ -9,6 +9,11 @@ class Turno(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
+    # Turno puede no tener paciente_id (walk-in con nombre_temp, todavía sin
+    # ficha), así que el dueño no se puede derivar siempre del paciente: se
+    # guarda directo acá.
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False, index=True)
+
     paciente_id = Column(
         Integer,
         ForeignKey("pacientes.id")
