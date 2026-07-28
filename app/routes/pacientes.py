@@ -10,6 +10,7 @@ from app.models.paciente import Paciente
 from app.models.turnos import Turno
 from app.models.nota import Nota
 from app.schemas.paciente import PacienteCreate, PacienteUpdate
+from app.core.permissions import get_paciente_propio
 
 from app.auth import get_current_user
 
@@ -74,12 +75,16 @@ def crear_paciente(
     user = Depends(get_current_user)
 ):
 
-    existente = db.query(Paciente).filter(Paciente.dni == paciente.dni).first()
+    existente = (
+        db.query(Paciente)
+        .filter(Paciente.dni == paciente.dni, Paciente.usuario_id == user["id"])
+        .first()
+    )
 
     if existente:
         raise HTTPException(status_code=400, detail="DNI ya registrado")
 
-    nuevo = Paciente(**paciente.dict())
+    nuevo = Paciente(**paciente.dict(), usuario_id=user["id"])
     nuevo.imc = calcular_imc(nuevo.peso, nuevo.talla)
 
     db.add(nuevo)
@@ -95,7 +100,7 @@ def listar_pacientes(
     db: Session = Depends(get_db),
     user = Depends(get_current_user)
 ):
-    query = db.query(Paciente)
+    query = db.query(Paciente).filter(Paciente.usuario_id == user["id"])
 
     if search:
         query = query.filter(
@@ -117,10 +122,7 @@ def obtener_paciente(
     db: Session = Depends(get_db),
     user = Depends(get_current_user)
 ):
-    paciente = db.query(Paciente).filter(Paciente.id == paciente_id).first()
-
-    if not paciente:
-        raise HTTPException(status_code=404, detail="Paciente no encontrado")
+    paciente = get_paciente_propio(db, paciente_id, user["id"])
 
     turnos = (
         db.query(Turno)
@@ -152,15 +154,16 @@ def actualizar_paciente(
     user = Depends(get_current_user)
 ):
 
-    paciente = db.query(Paciente).get(id)
-
-    if not paciente:
-        raise HTTPException(status_code=404, detail="Paciente no encontrado")
+    paciente = get_paciente_propio(db, id, user["id"])
 
     cambios = data.dict(exclude_unset=True)
 
     if "dni" in cambios:
-        existente = db.query(Paciente).filter(Paciente.dni == cambios["dni"]).first()
+        existente = (
+            db.query(Paciente)
+            .filter(Paciente.dni == cambios["dni"], Paciente.usuario_id == user["id"])
+            .first()
+        )
         if existente and existente.id != id:
             raise HTTPException(status_code=400, detail="DNI ya registrado")
 
@@ -183,10 +186,7 @@ def eliminar_paciente(
     user = Depends(get_current_user)
 ):
 
-    paciente = db.query(Paciente).get(id)
-
-    if not paciente:
-        raise HTTPException(status_code=404, detail="Paciente no encontrado")
+    paciente = get_paciente_propio(db, id, user["id"])
 
     db.delete(paciente)
     db.commit()

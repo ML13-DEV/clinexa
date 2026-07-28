@@ -1,9 +1,15 @@
-from sqlalchemy import Column, Integer, String, Date, Text, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Date, Text, Float, ForeignKey, UniqueConstraint
 from app.database import Base
 from sqlalchemy.orm import relationship
 
 class Paciente(Base):
     __tablename__ = "pacientes"
+    __table_args__ = (
+        # El mismo DNI puede repetirse entre pacientes de médicos distintos
+        # (son historias clínicas independientes); lo que no puede repetirse
+        # es el DNI dos veces para el mismo médico.
+        UniqueConstraint("usuario_id", "dni", name="uq_paciente_usuario_dni"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
 
@@ -16,7 +22,7 @@ class Paciente(Base):
     # Datos personales
     nombre = Column(String(100), nullable=False)
     apellido = Column(String(100), nullable=False)
-    dni = Column(String(20), unique=True, index=True)
+    dni = Column(String(20), index=True)
     fecha_nacimiento = Column(Date)
     telefono = Column(String(30))
 
