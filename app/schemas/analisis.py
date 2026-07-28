@@ -1,63 +1,20 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date, datetime
 
+
 class AnalisisCreate(BaseModel):
+    """Las determinaciones (gb, hb, glucemia, ...) no son campos fijos:
+    varían según el catálogo de la especialidad del médico dueño (ver
+    app/especialidades/analisis_config.py), así que se aceptan como
+    campos extra en vez de declararlos uno por uno."""
+
+    model_config = ConfigDict(extra="allow")
+
     paciente_id: int
     fecha: date
 
-    gb: float | None = None
-    nt: float | None = None
-    l: float | None = None
-    hb: float | None = None
-    hto: float | None = None
-    vcm: float | None = None
-    pqts: float | None = None
-
-    ferremia: float | None = None
-    ferritina: float | None = None
-    saturacion: float | None = None
-    tibc: float | None = None
-
-    epo: float | None = None
-    vit_b12: float | None = None
-    af: float | None = None
-    ldh: float | None = None
-
-    hepatograma: str | None = None
-    funcion_renal: str | None = None
-
-    tp: float | None = None
-    kptt: float | None = None
-    rino: float | None = None
-
-    otros_analisis: str | None = None
-
 
 class AnalisisUpdate(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
     fecha: datetime | None = None
-    gb: float | None = None
-    nt: float | None = None
-    l: float | None = None
-    hb: float | None = None
-    hto: float | None = None
-    vcm: float | None = None
-    pqts: float | None = None
-
-    ferremia: float | None = None
-    ferritina: float | None = None
-    saturacion: float | None = None
-    tibc: float | None = None
-
-    epo: float | None = None
-    vit_b12: float | None = None
-    af: float | None = None
-    ldh: float | None = None
-
-    hepatograma: str | None = None
-    funcion_renal: str | None = None
-
-    tp: float | None = None
-    kptt: float | None = None
-    rino: float | None = None
-
-    otros_analisis: str | None = None

@@ -10,23 +10,18 @@ router = APIRouter(
     dependencies=[Depends(get_current_user)]
 )
 
-# Campos de texto libre del panel de hematología; todo lo demás en
-# AnalisisCreate/Update es numérico. Cuando otra especialidad tenga su
-# propio panel de análisis, esto pasa a ser parte del catálogo de
-# especialidades en vez de una lista hardcodeada acá.
-CAMPOS_TEXTO = {"hepatograma", "funcion_renal", "otros_analisis"}
-
-
 def _serializar(db: Session, analisis: Analisis) -> dict:
     """Aplana las filas de analisis_valores de vuelta a un dict plano
-    (mismo shape que el AnalisisCreate/Update de siempre), para que el
-    frontend existente no tenga que cambiar."""
+    (mismo shape que el AnalisisCreate/Update), agnóstico de qué
+    especialidad/catálogo generó esas keys. Un valor se devuelve como
+    float si castea limpio; si no (texto libre: hepatograma, otros_analisis,
+    observaciones, ...), se devuelve tal cual."""
     filas = db.query(AnalisisValor).filter(AnalisisValor.analisis_id == analisis.id).all()
 
     resultado = {"id": analisis.id, "paciente_id": analisis.paciente_id, "fecha": analisis.fecha}
 
     for fila in filas:
-        if fila.analisis_key in CAMPOS_TEXTO or fila.valor is None:
+        if fila.valor is None:
             resultado[fila.analisis_key] = fila.valor
             continue
         try:

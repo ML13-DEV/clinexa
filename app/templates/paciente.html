@@ -127,29 +127,9 @@
     <div id="formAnalisis" class="card p-3 mb-3">
         <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-2">
             <div class="col"><input id="fechaAnalisis" type="date" class="form-control" placeholder="Fecha"></div>
-            <div class="col"><input id="gb" class="form-control" placeholder="GB"></div>
-            <div class="col"><input id="nt" class="form-control" placeholder="NT"></div>
-            <div class="col"><input id="l" class="form-control" placeholder="L"></div>
-            <div class="col"><input id="hb" class="form-control" placeholder="HB"></div>
-            <div class="col"><input id="hto" class="form-control" placeholder="HTO"></div>
-            <div class="col"><input id="vcm" class="form-control" placeholder="VCM"></div>
-            <div class="col"><input id="pqts" class="form-control" placeholder="PQTS"></div>
-            <div class="col"><input id="ferremia" class="form-control" placeholder="Ferremia"></div>
-            <div class="col"><input id="ferritina" class="form-control" placeholder="Ferritina"></div>
-            <div class="col"><input id="saturacion" class="form-control" placeholder="% Sat"></div>
-            <div class="col"><input id="tibc" class="form-control" placeholder="TIBC"></div>
-            <div class="col"><input id="epo" class="form-control" placeholder="EPO"></div>
-            <div class="col"><input id="vit_b12" class="form-control" placeholder="Vit B12"></div>
-            <div class="col"><input id="af" class="form-control" placeholder="AF"></div>
-            <div class="col"><input id="ldh" class="form-control" placeholder="LDH"></div>
-            <div class="col"><input id="tp" class="form-control" placeholder="TP"></div>
-            <div class="col"><input id="kptt" class="form-control" placeholder="KPTT"></div>
-            <div class="col"><input id="rino" class="form-control" placeholder="RIN"></div>
-            <div class="col"><input id="hepatograma" class="form-control" placeholder="Hepatograma"></div>
-            <div class="col"><input id="funcion_renal" class="form-control" placeholder="Función renal"></div>
-            <div class="col col-lg-6">
-                <textarea id="otros_analisis" class="form-control" placeholder="Otros análisis"></textarea>
-            </div>
+            <!-- Campos de la especialidad del médico logueado, ver
+                 GET /especialidades/analisis -->
+            <div id="camposFormAnalisis" class="col-12 row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-2"></div>
         </div>
 
         <button class="btn btn-success mt-3 w-100 w-md-auto" onclick="crearAnalisis()">
@@ -163,29 +143,9 @@
     <div id="tablaAnalisisParent" class="table-responsive mt-3">
         <table class="table table-dark table-striped table-hover text-center table-edit">
             <thead>
-                <tr>
+                <tr id="theadAnalisis">
                     <th>Fecha</th>
-                    <th onclick="cambiarGrafico('gb', this)">GB</th>
-                    <th onclick="cambiarGrafico('nt', this)">NT</th>
-                    <th onclick="cambiarGrafico('l', this)">LLL</th>
-                    <th onclick="cambiarGrafico('hb', this)">HB</th>
-                    <th onclick="cambiarGrafico('hto', this)">HTO</th>
-                    <th onclick="cambiarGrafico('vcm', this)">VCM</th>
-                    <th onclick="cambiarGrafico('pqts', this)">PQTS</th>
-                    <th onclick="cambiarGrafico('ferremia', this)">Ferrem</th>
-                    <th onclick="cambiarGrafico('ferritina', this)">Ferrit</th>
-                    <th onclick="cambiarGrafico('saturacion', this)">% Sat</th>
-                    <th onclick="cambiarGrafico('tibc', this)">TIBC</th>
-                    <th onclick="cambiarGrafico('epo', this)">EPO</th>
-                    <th onclick="cambiarGrafico('vit_b12', this)">B12</th>
-                    <th onclick="cambiarGrafico('af', this)">AF</th>
-                    <th onclick="cambiarGrafico('ldh', this)">LDH</th>
-                    <th onclick="cambiarGrafico('hepatograma', this)">Hep</th>
-                    <th onclick="cambiarGrafico('funcion_renal', this)">Ren</th>
-                    <th onclick="cambiarGrafico('tp', this)">TP</th>
-                    <th onclick="cambiarGrafico('kptt', this)">KPTT</th>
-                    <th onclick="cambiarGrafico('rino', this)">RIN</th>
-                    <th onclick="cambiarGrafico('otros_analisis', this)">Otros</th>
+                    <!-- columnas de la especialidad se insertan acá -->
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -285,35 +245,25 @@
             btn.addEventListener("click", confirmarEliminar);
         });
 
-        let campoActual = "hb"; // default
+        let campoActual = null;
         let chart = null;
+
+        // Catálogo de análisis de la especialidad del médico logueado (ver
+        // GET /especialidades/analisis). analisisTexto son las keys de tipo
+        // texto libre (hepatograma, otros_analisis, ...); todo lo que no
+        // esté ahí se trata como numérico.
+        let analisisEspecialidad = [];
+        let analisisTexto = new Set();
 
         // =========================
         // 🎨 RANGOS NORMALES (a definir a futuro)
         // =========================
         // Estructura preparada para cargar los rangos normales de cada
-        // análisis más adelante. Mientras min/max sean null, colorearValor()
-        // no aplica ningún color (comportamiento actual sin cambios).
-        const RANGOS_NORMALES = {
-            gb: { min: null, max: null },
-            nt: { min: null, max: null },
-            l: { min: null, max: null },
-            hb: { min: null, max: null },
-            hto: { min: null, max: null },
-            vcm: { min: null, max: null },
-            pqts: { min: null, max: null },
-            ferremia: { min: null, max: null },
-            ferritina: { min: null, max: null },
-            saturacion: { min: null, max: null },
-            tibc: { min: null, max: null },
-            epo: { min: null, max: null },
-            vit_b12: { min: null, max: null },
-            af: { min: null, max: null },
-            ldh: { min: null, max: null },
-            tp: { min: null, max: null },
-            kptt: { min: null, max: null },
-            rino: { min: null, max: null }
-        };
+        // análisis más adelante. Se arma dinámicamente a partir del
+        // catálogo de la especialidad; mientras min/max sean null,
+        // colorearValor() no aplica ningún color (comportamiento actual
+        // sin cambios).
+        let RANGOS_NORMALES = {};
 
         // rojo = alto, azul = bajo, verde = normal.
         // Devuelve la clase CSS a aplicar, o null si el campo no tiene rango
@@ -502,9 +452,57 @@
             camposEspecialidad = res.ok ? await res.json() : [];
         }
 
+        async function cargarAnalisisEspecialidadCatalogo() {
+            const res = await fetch("/especialidades/analisis", {
+                headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
+            });
+            analisisEspecialidad = res.ok ? await res.json() : [];
+            analisisTexto = new Set(
+                analisisEspecialidad.filter(c => c.tipo === "texto").map(c => c.key)
+            );
+
+            RANGOS_NORMALES = Object.fromEntries(
+                analisisEspecialidad.map(c => [c.key, { min: null, max: null }])
+            );
+
+            const primerNumerico = analisisEspecialidad.find(c => c.tipo !== "texto");
+            campoActual = primerNumerico ? primerNumerico.key : (analisisEspecialidad[0]?.key ?? null);
+
+            renderFormAnalisis();
+            renderTheadAnalisis();
+        }
+
+        function labelConUnidad(campo) {
+            return campo.unidad ? `${campo.label} (${campo.unidad})` : campo.label;
+        }
+
+        function renderFormAnalisis() {
+            const contenedor = document.getElementById("camposFormAnalisis");
+
+            contenedor.innerHTML = analisisEspecialidad.map(campo => {
+                const placeholder = labelConUnidad(campo);
+                if (campo.tipo === "texto") {
+                    return `<div class="col"><textarea id="${campo.key}" class="form-control" placeholder="${placeholder}"></textarea></div>`;
+                }
+                return `<div class="col"><input id="${campo.key}" class="form-control" placeholder="${placeholder}"></div>`;
+            }).join("");
+        }
+
+        function renderTheadAnalisis() {
+            const fila = document.getElementById("theadAnalisis");
+            const columnas = analisisEspecialidad.map(campo =>
+                `<th onclick="cambiarGrafico('${campo.key}', this)">${campo.label}</th>`
+            ).join("");
+
+            fila.innerHTML = `<th>Fecha</th>${columnas}<th>Acciones</th>`;
+        }
+
         async function cargarPaciente() {
             if (!camposEspecialidad.length) {
                 await cargarCamposEspecialidadCatalogo();
+            }
+            if (!analisisEspecialidad.length) {
+                await cargarAnalisisEspecialidadCatalogo();
             }
 
             const res = await fetch(`/pacientes/${pacienteId}`, {
@@ -935,35 +933,13 @@
 
                 tabla.appendChild(row);
 
+                const celdas = analisisEspecialidad
+                    .map(campo => celdaAnalisis(campo.key, a[campo.key]))
+                    .join("");
+
                 row.innerHTML = `
                     <td data-campo="fecha">${soloFecha(a.fecha)}</td>
-                    ${celdaAnalisis("gb", a.gb)}
-                    ${celdaAnalisis("nt", a.nt)}
-                    ${celdaAnalisis("l", a.l)}
-                    ${celdaAnalisis("hb", a.hb)}
-                    ${celdaAnalisis("hto", a.hto)}
-                    ${celdaAnalisis("vcm", a.vcm)}
-                    ${celdaAnalisis("pqts", a.pqts)}
-
-                    ${celdaAnalisis("ferremia", a.ferremia)}
-                    ${celdaAnalisis("ferritina", a.ferritina)}
-                    ${celdaAnalisis("saturacion", a.saturacion)}
-                    ${celdaAnalisis("tibc", a.tibc)}
-
-                    ${celdaAnalisis("epo", a.epo)}
-                    ${celdaAnalisis("vit_b12", a.vit_b12)}
-                    ${celdaAnalisis("af", a.af)}
-                    ${celdaAnalisis("ldh", a.ldh)}
-
-                    <td data-campo="hepatograma">${a.hepatograma ?? "-"}</td>
-                    <td data-campo="funcion_renal">${a.funcion_renal ?? "-"}</td>
-
-                    ${celdaAnalisis("tp", a.tp)}
-                    ${celdaAnalisis("kptt", a.kptt)}
-                    ${celdaAnalisis("rino", a.rino)}
-
-                    <td data-campo="otros_analisis">${a.otros_analisis ?? "-"}</td>
-
+                    ${celdas}
                     <td>
                         <button class="btn btn-sm btn-warning" onclick="editarFila(this, ${a.id})">✏️</button>
                         <button class="btn btn-sm btn-success d-none" onclick="guardarFila(this, ${a.id})">💾</button>
@@ -1014,34 +990,13 @@
             const data = {
                 paciente_id: pacienteId,
                 fecha: fecha,
-
-                gb: getValue("gb"),
-                nt: getValue("nt"),
-                l: getValue("l"),
-                hb: getValue("hb"),
-                hto: getValue("hto"),
-                vcm: getValue("vcm"),
-                pqts: getValue("pqts"),
-
-                ferremia: getValue("ferremia"),
-                ferritina: getValue("ferritina"),
-                saturacion: getValue("saturacion"),
-                tibc: getValue("tibc"),
-
-                epo: getValue("epo"),
-                vit_b12: getValue("vit_b12"),
-                af: getValue("af"),
-                ldh: getValue("ldh"),
-
-                hepatograma: getValueText("hepatograma"),
-                funcion_renal: getValueText("funcion_renal"),
-
-                tp: getValue("tp"),
-                kptt: getValue("kptt"),
-                rino: getValue("rino"),
-
-                otros_analisis: getValueText("otros_analisis")
             };
+
+            analisisEspecialidad.forEach(campo => {
+                data[campo.key] = analisisTexto.has(campo.key)
+                    ? getValueText(campo.key)
+                    : getValue(campo.key);
+            });
 
             try {
 
@@ -1081,77 +1036,6 @@
                 console.error(error);
                 mostrarToast("Error inesperado al guardar ❌", "danger");
             }
-        }
-
-        function editarAnalisis(id) {
-            const fila = event.target.closest("tr");
-
-            fila.querySelectorAll("td").forEach((td, index) => {
-                const campo = td.getAttribute("data-campo");
-                
-                // No editamos fecha (0) ni acciones (20)
-                if (index === 0 || index === 20 || !campo) return;
-
-                // Dentro del bucle en editarAnalisis:
-                const valor = td.innerText.trim();
-                td.innerHTML = `<input type="text" class="input-tabla" value="${valor === "-" ? "" : valor}">`;
-            });
-
-            // Botones de guardar/cancelar
-            fila.lastElementChild.innerHTML = `
-                <button class="btn btn-success btn-sm" onclick="guardarAnalisis(${id})">✔</button>
-                <button class="btn btn-secondary btn-sm" onclick="cargarAnalisis()">✖</button>
-            `;
-        }
-
-        async function guardarAnalisis(id) {
-
-            const fila = event.target.closest("tr");
-            const fechaInput = document.getElementById("fechaAnalisis").value;
-            const inputs = fila.querySelectorAll("input");
-
-            function parseNumber(val) {
-                return val === "" ? null : Number(val);
-            }
-
-            const data = {
-
-                paciente_id: pacienteId, 
-                fecha: fechaInput || new Date().toISOString().split("T")[0], 
-                gb: parseNumber(inputs[0].value),
-                nt: parseNumber(inputs[1].value),
-                l: parseNumber(inputs[2].value),
-                hb: parseNumber(inputs[3].value),
-                hto: parseNumber(inputs[4].value),
-                vcm: parseNumber(inputs[5].value),
-                pqts: parseNumber(inputs[6].value),
-                ferritina: parseNumber(inputs[7].value),
-                vit_b12: parseNumber(inputs[8].value),
-                tp: parseNumber(inputs[9].value),
-                kptt: parseNumber(inputs[10].value),
-                rino: parseNumber(inputs[11].value)
-            };
-
-            console.log(data);
-            console.log(fechaInput);
-
-            const res = await fetch(`/analisis/${id}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + localStorage.getItem("token")
-                },
-                body: JSON.stringify(data)
-            });
-
-            if (!res.ok) {
-                mostrarToast("Error ❌", "danger");
-                return;
-            }
-
-            mostrarToast("Análisis actualizado ✅");
-
-            await cargarAnalisis();
         }
 
         let idAEliminar = null;
@@ -1328,7 +1212,7 @@
                     `;
                 }
                 // 🔥 CAMPOS DE TEXTO LARGO (texto libre)
-                else if (["hepatograma", "funcion_renal", "otros_analisis"].includes(campo)) {
+                else if (analisisTexto.has(campo)) {
                     td.innerHTML = `
                         <textarea class="form-control form-control-sm">${valor}</textarea>
                     `;
@@ -1370,7 +1254,7 @@
                 }
 
                 // 🔥 TEXTOS (texto libre)
-                else if (["hepatograma", "funcion_renal", "otros_analisis"].includes(campo)) {
+                else if (analisisTexto.has(campo)) {
                     data[campo] = valor;
                 }
 
