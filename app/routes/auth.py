@@ -32,4 +32,4 @@ def login(user: LoginSchema, db: Session = Depends(get_db)):
         "id": usuario.id
     })
 
-    return {"access_token": token}
+    return {"access_token": token, "rol": usuario.rol}

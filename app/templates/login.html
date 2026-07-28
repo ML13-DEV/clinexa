@@ -107,13 +107,14 @@
         }
 
         localStorage.setItem("token", data.access_token);
+        localStorage.setItem("rol", data.rol);
 
-        window.location.href = "/";
+        window.location.href = data.rol === "owner" ? "/owner" : "/";
     }
 
     // 🔥 AUTO LOGIN
     if (localStorage.getItem("token")) {
-        window.location.href = "/";
+        window.location.href = localStorage.getItem("rol") === "owner" ? "/owner" : "/";
     }
 
     </script>
