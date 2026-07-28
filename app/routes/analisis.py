@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app.models.analisis import Analisis
 
 from app.schemas.analisis import AnalisisCreate, AnalisisUpdate
-from app.auth import get_current_user  # 👈 agregado
+from app.auth import get_current_user
+from app.core.permissions import get_paciente_propio, get_registro_de_paciente_propio
 
 router = APIRouter(
     dependencies=[Depends(get_current_user)]
@@ -23,8 +24,10 @@ def get_db():
 def crear_analisis(
     data: AnalisisCreate,
     db: Session = Depends(get_db),
-    user = Depends(get_current_user)  # 👈 agregado
+    user = Depends(get_current_user)
 ):
+    get_paciente_propio(db, data.paciente_id, user["id"])
+
     nuevo = Analisis(**data.dict())
     db.add(nuevo)
     db.commit()
@@ -36,8 +39,10 @@ def crear_analisis(
 def obtener_analisis(
     paciente_id: int,
     db: Session = Depends(get_db),
-    user = Depends(get_current_user)  # 👈 agregado
+    user = Depends(get_current_user)
 ):
+    get_paciente_propio(db, paciente_id, user["id"])
+
     return db.query(Analisis)\
         .filter(Analisis.paciente_id == paciente_id)\
         .order_by(Analisis.fecha.desc())\
@@ -48,12 +53,9 @@ def obtener_analisis(
 def eliminar_analisis(
     id: int,
     db: Session = Depends(get_db),
-    user = Depends(get_current_user)  # 👈 agregado
+    user = Depends(get_current_user)
 ):
-    analisis = db.query(Analisis).filter(Analisis.id == id).first()
-
-    if not analisis:
-        raise HTTPException(status_code=404, detail="No existe")
+    analisis = get_registro_de_paciente_propio(db, Analisis, id, user["id"], detail="No existe")
 
     db.delete(analisis)
     db.commit()
@@ -66,12 +68,9 @@ def actualizar_analisis(
     id: int,
     data: AnalisisUpdate,
     db: Session = Depends(get_db),
-    user = Depends(get_current_user)  # 👈 agregado
+    user = Depends(get_current_user)
 ):
-    analisis = db.query(Analisis).get(id)
-
-    if not analisis:
-        raise HTTPException(status_code=404, detail="No encontrado")
+    analisis = get_registro_de_paciente_propio(db, Analisis, id, user["id"], detail="No encontrado")
 
     for key, value in data.dict(exclude_unset=True).items():
         setattr(analisis, key, value)

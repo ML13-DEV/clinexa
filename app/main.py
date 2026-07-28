@@ -12,12 +12,10 @@ from app.models.usuario import Usuario
 from app.models.paciente import Paciente
 from app.models.turnos import Turno
 from app.models.nota import Nota
-
-from app.modules.hematologia.models import Analisis
+from app.models.analisis import Analisis
 
 # ROUTES
-from app.routes import pacientes, turnos, notas, auth
-from app.modules.hematologia.routes import router as analisis_router
+from app.routes import pacientes, turnos, notas, auth, analisis
 from app.routes import admin
 
 from dotenv import load_dotenv
@@ -30,7 +28,7 @@ app = FastAPI()
 app.include_router(pacientes.router)
 app.include_router(turnos.router)
 app.include_router(notas.router)
-app.include_router(analisis_router)
+app.include_router(analisis.router)
 app.include_router(auth.router)
 app.include_router(admin.router)
 
