@@ -3,10 +3,10 @@ from sqlalchemy.orm import Session
 from app.models.nota import Nota
 from app.schemas.nota import NotaCreate, NotaUpdate
 from app.core.permissions import get_paciente_propio, get_registro_de_paciente_propio
-from app.core.dependencies import get_db, get_current_user
+from app.core.dependencies import get_db, get_current_user, get_current_medico
 
 router = APIRouter(
-    dependencies=[Depends(get_current_user)]
+    dependencies=[Depends(get_current_medico)]
 )
 
 

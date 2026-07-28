@@ -10,7 +10,7 @@ from app.models.turnos import Turno
 from app.models.nota import Nota
 from app.schemas.paciente import PacienteCreate, PacienteUpdate
 from app.core.permissions import get_paciente_propio
-from app.core.dependencies import get_db, get_current_user
+from app.core.dependencies import get_db, get_current_medico
 from app.especialidades.config import validar_datos_clinicos
 
 router = APIRouter()
@@ -59,7 +59,7 @@ def nuevo_paciente(
 def crear_paciente(
     paciente: PacienteCreate,
     db: Session = Depends(get_db),
-    user = Depends(get_current_user)
+    user = Depends(get_current_medico)
 ):
 
     existente = (
@@ -90,7 +90,7 @@ def crear_paciente(
 def listar_pacientes(
     search: str = Query(default=None),
     db: Session = Depends(get_db),
-    user = Depends(get_current_user)
+    user = Depends(get_current_medico)
 ):
     query = db.query(Paciente).filter(Paciente.usuario_id == user["id"])
 
@@ -112,7 +112,7 @@ def listar_pacientes(
 def obtener_paciente(
     paciente_id: int,
     db: Session = Depends(get_db),
-    user = Depends(get_current_user)
+    user = Depends(get_current_medico)
 ):
     paciente = get_paciente_propio(db, paciente_id, user["id"])
 
@@ -143,7 +143,7 @@ def actualizar_paciente(
     id: int,
     data: PacienteUpdate,
     db: Session = Depends(get_db),
-    user = Depends(get_current_user)
+    user = Depends(get_current_medico)
 ):
 
     paciente = get_paciente_propio(db, id, user["id"])
@@ -181,7 +181,7 @@ def actualizar_paciente(
 def eliminar_paciente(
     id: int,
     db: Session = Depends(get_db),
-    user = Depends(get_current_user)
+    user = Depends(get_current_medico)
 ):
 
     paciente = get_paciente_propio(db, id, user["id"])

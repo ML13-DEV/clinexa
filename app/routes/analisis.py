@@ -4,11 +4,11 @@ from app.models.analisis import Analisis, AnalisisValor
 
 from app.schemas.analisis import AnalisisCreate, AnalisisUpdate
 from app.core.permissions import get_paciente_propio, get_registro_de_paciente_propio
-from app.core.dependencies import get_db, get_current_user
+from app.core.dependencies import get_db, get_current_user, get_current_medico
 from app.especialidades.analisis_config import validar_analisis
 
 router = APIRouter(
-    dependencies=[Depends(get_current_user)]
+    dependencies=[Depends(get_current_medico)]
 )
 
 def _serializar(db: Session, analisis: Analisis) -> dict:

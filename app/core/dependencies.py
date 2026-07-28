@@ -29,3 +29,12 @@ def get_current_owner(user: dict = Depends(get_current_user)) -> dict:
     if user.get("rol") != "owner":
         raise HTTPException(status_code=403, detail="No autorizado")
     return user
+
+
+def get_current_medico(user: dict = Depends(get_current_user)) -> dict:
+    """Para los endpoints clínicos (pacientes/notas/analisis/turnos): un
+    owner tiene un JWT válido pero no gestiona pacientes, así que no debe
+    poder pegarle a estas rutas."""
+    if user.get("rol") != "medico":
+        raise HTTPException(status_code=403, detail="No autorizado")
+    return user

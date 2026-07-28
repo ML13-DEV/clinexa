@@ -10,10 +10,10 @@ from app.models.turnos import Turno
 from app.schemas.turnos import TurnoCreate
 
 from app.core.permissions import get_paciente_propio
-from app.core.dependencies import get_db, get_current_user
+from app.core.dependencies import get_db, get_current_user, get_current_medico
 
 router = APIRouter(
-    dependencies=[Depends(get_current_user)]
+    dependencies=[Depends(get_current_medico)]
 )
 
 # =========================
