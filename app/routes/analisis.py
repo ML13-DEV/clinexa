@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.models.analisis import Analisis, AnalisisValor
 
 from app.schemas.analisis import AnalisisCreate, AnalisisUpdate
 from app.core.permissions import get_paciente_propio, get_registro_de_paciente_propio
 from app.core.dependencies import get_db, get_current_user
+from app.especialidades.analisis_config import validar_analisis
 
 router = APIRouter(
     dependencies=[Depends(get_current_user)]
@@ -65,6 +66,11 @@ def crear_analisis(
     paciente_id = payload.pop("paciente_id")
     fecha = payload.pop("fecha")
 
+    try:
+        validar_analisis(user["especialidad"], payload)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
     nuevo = Analisis(paciente_id=paciente_id, fecha=fecha)
     db.add(nuevo)
     db.flush()
@@ -119,6 +125,11 @@ def actualizar_analisis(
     cambios = data.dict(exclude_unset=True)
     if "fecha" in cambios:
         analisis.fecha = cambios.pop("fecha")
+
+    try:
+        validar_analisis(user["especialidad"], cambios)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
 
     _actualizar_valores(db, analisis.id, cambios)
 

@@ -83,16 +83,41 @@ def campos_de(especialidad: str) -> list[CampoClinico]:
 
 
 def validar_datos_clinicos(especialidad: str, datos: dict) -> None:
-    """Chequea que estén los campos requeridos de la especialidad.
-
-    No valida tipos ni opciones de SELECT todavía: alcanza con esto hasta
-    que el formulario dinámico del frontend esté armado y se vea qué tanta
-    validación de tipo hace falta del lado del servidor.
+    """Valida datos_clinicos contra el catálogo de la especialidad: rechaza
+    keys que el catálogo no define, chequea que los campos requeridos estén
+    presentes, que un NUMERO castee a float y que un SELECT tenga una de
+    las opciones definidas. Junta todos los errores encontrados en vez de
+    cortar en el primero, para que el médico los corrija todos de una.
     """
+    catalogo = {campo.key: campo for campo in campos_de(especialidad)}
+    errores = []
+
+    desconocidas = [key for key in datos if key not in catalogo]
+    if desconocidas:
+        errores.append(f"Campos no válidos para {especialidad}: {', '.join(desconocidas)}")
+
     faltantes = [
         campo.label
-        for campo in campos_de(especialidad)
+        for campo in catalogo.values()
         if campo.requerido and not datos.get(campo.key)
     ]
     if faltantes:
-        raise ValueError(f"Faltan campos requeridos: {', '.join(faltantes)}")
+        errores.append(f"Faltan campos requeridos: {', '.join(faltantes)}")
+
+    for key, valor in datos.items():
+        campo = catalogo.get(key)
+        if campo is None or valor in (None, ""):
+            continue
+        if campo.tipo == TipoCampo.NUMERO:
+            try:
+                float(valor)
+            except (TypeError, ValueError):
+                errores.append(f"{campo.label}: se esperaba un número, se recibió {valor!r}")
+        elif campo.tipo == TipoCampo.SELECT and valor not in campo.opciones:
+            errores.append(
+                f"{campo.label}: opción inválida {valor!r} "
+                f"(debe ser una de: {', '.join(campo.opciones)})"
+            )
+
+    if errores:
+        raise ValueError("; ".join(errores))

@@ -74,7 +74,7 @@ def crear_paciente(
     try:
         validar_datos_clinicos(user["especialidad"], paciente.datos_clinicos)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=422, detail=str(e))
 
     nuevo = Paciente(**paciente.dict(), usuario_id=user["id"])
     nuevo.imc = calcular_imc(nuevo.peso, nuevo.talla)
@@ -163,7 +163,7 @@ def actualizar_paciente(
         try:
             validar_datos_clinicos(user["especialidad"], cambios["datos_clinicos"])
         except ValueError as e:
-            raise HTTPException(status_code=400, detail=str(e))
+            raise HTTPException(status_code=422, detail=str(e))
 
     for key, value in cambios.items():
         setattr(paciente, key, value)

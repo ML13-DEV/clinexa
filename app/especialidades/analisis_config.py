@@ -90,3 +90,33 @@ ANALISIS_POR_ESPECIALIDAD: dict[str, list[CampoAnalisis]] = {
 
 def analisis_de(especialidad: str) -> list[CampoAnalisis]:
     return ANALISIS_POR_ESPECIALIDAD.get(especialidad, [])
+
+
+def validar_analisis(especialidad: str, datos: dict) -> None:
+    """Valida las determinaciones de un análisis contra el catálogo de la
+    especialidad: rechaza keys que el catálogo no define y chequea que un
+    campo NUMERO castee a float. No hay concepto de "requerido" acá (a
+    diferencia de CampoClinico) porque un análisis puede cargar solo
+    algunas determinaciones — encaja con que AnalisisUpdate sea parcial.
+    """
+    catalogo = {campo.key: campo for campo in analisis_de(especialidad)}
+    errores = []
+
+    desconocidas = [key for key in datos if key not in catalogo]
+    if desconocidas:
+        errores.append(
+            f"Determinaciones no válidas para {especialidad}: {', '.join(desconocidas)}"
+        )
+
+    for key, valor in datos.items():
+        campo = catalogo.get(key)
+        if campo is None or valor is None:
+            continue
+        if campo.tipo == TipoAnalisis.NUMERO:
+            try:
+                float(valor)
+            except (TypeError, ValueError):
+                errores.append(f"{campo.label}: se esperaba un número, se recibió {valor!r}")
+
+    if errores:
+        raise ValueError("; ".join(errores))
