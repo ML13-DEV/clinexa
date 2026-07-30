@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from typing import Optional
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, or_
-from datetime import datetime, date
+from datetime import datetime
 from pydantic import BaseModel
 
 from app.models.paciente import Paciente
@@ -11,6 +11,7 @@ from app.schemas.turnos import TurnoCreate
 
 from app.core.permissions import get_paciente_propio
 from app.core.dependencies import get_db, get_current_user, get_current_medico
+from app.core.timezone import hoy_consultorio
 
 router = APIRouter(
     dependencies=[Depends(get_current_medico)]
@@ -180,7 +181,7 @@ def turnos_de_hoy(
     user = Depends(get_current_user)
 ):
 
-    hoy = date.today()
+    hoy = hoy_consultorio()
 
     turnos = (
         db.query(Turno)
@@ -202,7 +203,7 @@ def estadisticas_turnos(
     user = Depends(get_current_user)
 ):
 
-    hoy = date.today()
+    hoy = hoy_consultorio()
 
     total = db.query(func.count(Turno.id))\
         .filter(Turno.usuario_id == user["id"], func.date(Turno.fecha) == hoy)\

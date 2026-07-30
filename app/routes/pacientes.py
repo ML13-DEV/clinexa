@@ -3,7 +3,6 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from datetime import date
 
 from app.models.paciente import Paciente
 from app.models.turnos import Turno
@@ -11,6 +10,7 @@ from app.models.nota import Nota
 from app.schemas.paciente import PacienteCreate, PacienteUpdate
 from app.core.permissions import get_paciente_propio
 from app.core.dependencies import get_db, get_current_medico
+from app.core.timezone import hoy_consultorio
 from app.especialidades.config import validar_datos_clinicos
 
 router = APIRouter()
@@ -23,7 +23,7 @@ templates = Jinja2Templates(directory="app/templates")
 # =========================
 
 def calcular_edad(fecha_nacimiento):
-    today = date.today()
+    today = hoy_consultorio()
     return today.year - fecha_nacimiento.year - (
         (today.month, today.day) < (fecha_nacimiento.month, fecha_nacimiento.day)
     )

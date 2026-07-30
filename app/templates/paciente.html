@@ -304,6 +304,16 @@
             return div.innerHTML;
         }
 
+        // Arma un string "YYYY-MM-DDTHH:mm:ss" con los dígitos de la hora
+        // local del navegador, sin offset/Z — mismo criterio que el input
+        // datetime-local de crearTurno(): el backend lo guarda tal cual,
+        // como naive, representando hora de Buenos Aires directamente.
+        function fechaLocalNaiveISO(date) {
+            const pad = n => String(n).padStart(2, "0");
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+                `T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+        }
+
         function formatearFecha(fecha) {
             return new Date(fecha).toLocaleString("es-AR", {
                 timeZone: "America/Argentina/Buenos_Aires",
@@ -711,17 +721,10 @@
             await cargarPaciente(); // 🔥 clave
         }
         async function crearNota() {
-            // Usamos toISOString() para que sea 100% compatible con Python datetime
-            const ahora = new Date();
-            // Ajuste manual para mandar la hora local como si fuera "falsa UTC" 
-            // para que el backend la guarde tal cual la ves
-            const offset = ahora.getTimezoneOffset() * 60000;
-            const fechaLocal = new Date(ahora.getTime() - offset).toISOString();
-
             const nota = {
                 paciente_id: pacienteId,
                 contenido: document.getElementById("contenidoNota").value,
-                fecha: fechaLocal 
+                fecha: fechaLocalNaiveISO(new Date())
             };
 
             await fetch("/notas", {
