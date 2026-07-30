@@ -13,7 +13,7 @@ function renderCampoInput(campo, valor) {
     const requiredAttr = campo.requerido ? "required" : "";
 
     if (campo.tipo === "textarea") {
-        return `<textarea ${attrs} ${requiredAttr} placeholder="${campo.label}">${value}</textarea>`;
+        return `<textarea ${attrs} ${requiredAttr}>${value}</textarea>`;
     }
 
     if (campo.tipo === "select") {
@@ -24,7 +24,7 @@ function renderCampoInput(campo, valor) {
     }
 
     const tipoInput = campo.tipo === "numero" ? "number" : campo.tipo === "fecha" ? "date" : "text";
-    return `<input type="${tipoInput}" ${attrs} ${requiredAttr} placeholder="${campo.label}" value="${value}">`;
+    return `<input type="${tipoInput}" ${attrs} ${requiredAttr} value="${value}">`;
 }
 
 function renderCamposEspecialidad(containerId, campos, valores = {}) {
@@ -37,7 +37,7 @@ function renderCamposEspecialidad(containerId, campos, valores = {}) {
     }
 
     container.innerHTML = campos.map(campo => `
-        <label class="form-label small text-muted mb-1">${campo.label}${campo.requerido ? " *" : ""}</label>
+        <label for="campo_${campo.key}" class="form-label small text-muted mb-1">${campo.label}${campo.requerido ? " *" : ""}</label>
         ${renderCampoInput(campo, valores[campo.key])}
     `).join("");
 }

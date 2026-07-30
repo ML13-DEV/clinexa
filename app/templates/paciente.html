@@ -125,11 +125,14 @@
 
     <!-- 🔹 FORM -->
     <div id="formAnalisis" class="card p-3 mb-3">
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-2">
-            <div class="col"><input id="fechaAnalisis" type="date" class="form-control" placeholder="Fecha"></div>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
+            <div class="col">
+                <label for="fechaAnalisis" class="form-label small text-muted mb-1">Fecha</label>
+                <input id="fechaAnalisis" type="date" class="form-control">
+            </div>
             <!-- Campos de la especialidad del médico logueado, ver
                  GET /especialidades/analisis -->
-            <div id="camposFormAnalisis" class="col-12 row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-2"></div>
+            <div id="camposFormAnalisis" class="col-12 row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3"></div>
         </div>
 
         <button class="btn btn-success mt-3 w-100 w-md-auto" onclick="crearAnalisis()">
@@ -490,11 +493,14 @@
             const contenedor = document.getElementById("camposFormAnalisis");
 
             contenedor.innerHTML = analisisEspecialidad.map(campo => {
-                const placeholder = labelConUnidad(campo);
-                if (campo.tipo === "texto") {
-                    return `<div class="col"><textarea id="${campo.key}" class="form-control" placeholder="${placeholder}"></textarea></div>`;
-                }
-                return `<div class="col"><input id="${campo.key}" class="form-control" placeholder="${placeholder}"></div>`;
+                const label = labelConUnidad(campo);
+                const input = campo.tipo === "texto"
+                    ? `<textarea id="${campo.key}" class="form-control" rows="1"></textarea>`
+                    : `<input id="${campo.key}" class="form-control">`;
+                return `<div class="col">
+                    <label for="${campo.key}" class="form-label small text-muted mb-1">${label}</label>
+                    ${input}
+                </div>`;
             }).join("");
         }
 
