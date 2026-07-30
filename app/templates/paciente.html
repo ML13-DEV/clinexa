@@ -89,6 +89,7 @@
         </div>
     </div>
 
+    <div id="timelineTurnos" class="timeline"></div>
 
     <h3>Notas</h3>
     <div class="card p-3 mb-3">
@@ -583,6 +584,40 @@
                 ${crearCard("antecedentes_personales", "Antecedentes personales", data.paciente.antecedentes_personales)}
                 ${crearCard("antecedentes_familiares", "Antecedentes familiares", data.paciente.antecedentes_familiares)}
             `;
+
+            // =========================
+            // 📅 TURNOS (timeline)
+            // =========================
+
+            const timelineTurnos = document.getElementById("timelineTurnos");
+            timelineTurnos.innerHTML = "";
+
+            data.turnos.forEach(t => {
+                const div = document.createElement("div");
+                div.className = `timeline-item ${t.estado}`;
+
+                const badge = t.estado === "pendiente"
+                    ? `<span class="badge bg-warning text-dark">Pendiente</span>`
+                    : `<span class="badge bg-success">Atendido</span>`;
+
+                const detalleAtendido = t.estado === "atendido" ? `
+                    ${t.diagnostico ? `<div><strong>Diagnóstico:</strong> ${escapeHtml(t.diagnostico)}</div>` : ""}
+                    ${t.observaciones ? `<div><strong>Observaciones:</strong> ${escapeHtml(t.observaciones)}</div>` : ""}
+                ` : "";
+
+                div.innerHTML = `
+                    <div class="timeline-content">
+                        <div class="d-flex justify-content-between align-items-start mb-1 gap-2">
+                            <strong>${formatearFecha(t.fecha)}</strong>
+                            ${badge}
+                        </div>
+                        <div>${escapeHtml(t.motivo)}</div>
+                        ${detalleAtendido}
+                    </div>
+                `;
+
+                timelineTurnos.appendChild(div);
+            });
 
             // =========================
             // 📝 NOTAS (timeline)
