@@ -29,7 +29,7 @@
         <div class="d-flex gap-2">
             <button onclick="logout()" class="btn btn-danger">Salir</button>
 
-            <button class="btn btn-sm btn-secondary" onclick="toggleDarkMode()">
+            <button class="btn btn-sm btn-secondary" onclick="toggleDarkModeYRedibujar()">
                 🌙
             </button>
         </div>
@@ -98,6 +98,20 @@
         function logout() {
             localStorage.removeItem("token");
             window.location.href = "/login";
+        }
+
+        function toggleDarkModeYRedibujar() {
+            toggleDarkMode();
+
+            // El toggle de dark mode dispara un reflow que, con varios
+            // canvases en la misma pagina, a veces deja el scale de
+            // Chart.js colapsado en 0 (bug reproducido: los datos del
+            // chart quedan intactos pero no repinta bien). Forzamos un
+            // resize explicito de cada grafico para que se redibuje
+            // correctamente.
+            [chartDiagnosticos, chartRangoEtario, chartLocalidades, chartObrasSociales, chartAltasPorMes]
+                .filter(Boolean)
+                .forEach(c => c.resize());
         }
 
         document.addEventListener("DOMContentLoaded", () => {
