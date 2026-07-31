@@ -56,4 +56,12 @@ def ver_agenda(request: Request):
         request=request,
         name="agenda.html"
     )
-    
+
+
+@app.get("/estadisticas", response_class=HTMLResponse)
+def ver_estadisticas(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="estadisticas.html"
+    )
+

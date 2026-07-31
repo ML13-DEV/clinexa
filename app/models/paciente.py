@@ -28,6 +28,7 @@ class Paciente(Base):
     dni = Column(String(20), index=True)
     fecha_nacimiento = Column(Date)
     telefono = Column(String(30))
+    localidad = Column(String(150))
 
     # Obra social
     obra_social = Column(String(100))
