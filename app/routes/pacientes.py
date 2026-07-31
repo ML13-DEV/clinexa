@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, Query, Request, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
-from datetime import date
+from sqlalchemy import or_, func
+from datetime import date, datetime, timedelta
 
 from app.database import SessionLocal
 from app.models.paciente import Paciente
@@ -49,6 +49,117 @@ def calcular_imc(peso, talla):
     if talla_m <= 0:
         return None
     return round(peso / (talla_m ** 2), 2)
+
+
+# Rangos etarios fijos para el dashboard de estadísticas.
+RANGOS_ETARIOS = [
+    ("0-17", 0, 17),
+    ("18-30", 18, 30),
+    ("31-45", 31, 45),
+    ("46-60", 46, 60),
+    ("61+", 61, None),
+]
+
+
+def _rango_etario(edad):
+    for etiqueta, minimo, maximo in RANGOS_ETARIOS:
+        if maximo is None:
+            if edad >= minimo:
+                return etiqueta
+        elif minimo <= edad <= maximo:
+            return etiqueta
+    return RANGOS_ETARIOS[0][0]
+
+
+def _top_texto_normalizado(db, columna, limite=5):
+    """Agrupa un campo de texto libre ignorando mayúsculas/espacios,
+    mostrando la etiqueta con formato prolijo (primera letra de cada
+    palabra en mayúscula)."""
+    clave = func.trim(func.lower(columna))
+    etiqueta = func.initcap(clave)
+
+    filas = (
+        db.query(etiqueta.label("label"), func.count().label("cantidad"))
+        .filter(columna.isnot(None))
+        .filter(func.trim(columna) != "")
+        .group_by(clave)
+        .order_by(func.count().desc())
+        .limit(limite)
+        .all()
+    )
+
+    return [{"label": label, "cantidad": cantidad} for label, cantidad in filas]
+
+
+def _distribucion_por_edad(db):
+    """Trae solo fecha_nacimiento (no el paciente completo) y reusa
+    calcular_edad() para agrupar en rangos fijos."""
+    fechas = (
+        db.query(Paciente.fecha_nacimiento)
+        .filter(Paciente.fecha_nacimiento.isnot(None))
+        .all()
+    )
+
+    conteos = {etiqueta: 0 for etiqueta, _, _ in RANGOS_ETARIOS}
+
+    for (fecha_nacimiento,) in fechas:
+        edad = calcular_edad(fecha_nacimiento)
+        conteos[_rango_etario(edad)] += 1
+
+    return [
+        {"rango": etiqueta, "cantidad": conteos[etiqueta]}
+        for etiqueta, _, _ in RANGOS_ETARIOS
+    ]
+
+
+def _primer_dia_hace_n_meses(n):
+    hoy = date.today()
+    mes_total = hoy.month - 1 - n
+    anio = hoy.year + mes_total // 12
+    mes = mes_total % 12 + 1
+    return date(anio, mes, 1)
+
+
+def _pacientes_nuevos_por_mes(db, meses=6):
+    mes_trunc = func.date_trunc("month", Paciente.creado_en)
+    desde = _primer_dia_hace_n_meses(meses - 1)
+
+    filas = (
+        db.query(mes_trunc.label("mes"), func.count().label("cantidad"))
+        .filter(Paciente.creado_en >= desde)
+        .group_by(mes_trunc)
+        .order_by(mes_trunc)
+        .all()
+    )
+
+    return [{"mes": mes.strftime("%Y-%m"), "cantidad": cantidad} for mes, cantidad in filas]
+
+
+def _pacientes_sin_seguimiento(db, meses=6):
+    """Pacientes sin ninguna nota, o cuya nota mas reciente supera el
+    umbral: se 'perdieron' de seguimiento clinico."""
+    cutoff = datetime.utcnow() - timedelta(days=30 * meses)
+
+    ultima_nota = (
+        db.query(
+            Nota.paciente_id.label("paciente_id"),
+            func.max(Nota.fecha).label("ultima_fecha"),
+        )
+        .group_by(Nota.paciente_id)
+        .subquery()
+    )
+
+    return (
+        db.query(func.count(Paciente.id))
+        .outerjoin(ultima_nota, ultima_nota.c.paciente_id == Paciente.id)
+        .filter(
+            or_(
+                ultima_nota.c.ultima_fecha.is_(None),
+                ultima_nota.c.ultima_fecha < cutoff,
+            )
+        )
+        .scalar()
+    )
 
 
 # =========================
@@ -109,6 +220,22 @@ def listar_pacientes(
     pacientes = query.order_by(Paciente.id.desc()).all()
 
     return pacientes
+
+
+@router.get("/pacientes/estadisticas")
+def estadisticas_pacientes(
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user)
+):
+    return {
+        "total_pacientes": db.query(func.count(Paciente.id)).scalar(),
+        "top_diagnosticos": _top_texto_normalizado(db, Paciente.diagnostico_principal),
+        "top_localidades": _top_texto_normalizado(db, Paciente.localidad),
+        "top_obras_sociales": _top_texto_normalizado(db, Paciente.obra_social),
+        "rango_etario": _distribucion_por_edad(db),
+        "pacientes_nuevos_por_mes": _pacientes_nuevos_por_mes(db),
+        "pacientes_sin_seguimiento": _pacientes_sin_seguimiento(db),
+    }
 
 
 @router.get("/pacientes/{paciente_id}")
