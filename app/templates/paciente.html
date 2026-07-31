@@ -77,25 +77,6 @@
 
     <div id="datosMedicos" class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3"></div>
 
-    <h3>Nuevo Turno</h3>
-
-    <div class="card p-3 mb-3">
-        <div class="row g-2">
-            <div class="col-12 col-md-6">
-                <input id="fechaTurno" type="datetime-local" class="form-control">
-            </div>
-            <div class="col-12 col-md-6">
-                <input id="motivo" class="form-control" placeholder="Motivo">
-            </div>
-            <div class="col-12">
-                <button class="btn btn-success w-100 w-md-auto" onclick="crearTurno()">
-                    Crear turno
-                </button>
-            </div>
-        </div>
-    </div>
-
-
     <h3>Notas</h3>
     <div class="card p-3 mb-3">
         <div class="row g-2">
@@ -645,45 +626,6 @@
         cargarPaciente();
 
 
-        async function crearTurno() {
-
-            const fecha = document.getElementById("fechaTurno").value;
-            const motivo = document.getElementById("motivo").value;
-
-            if (!fecha || !motivo) {
-                mostrarToast("Completá todos los campos ❌", "danger");
-                return;
-            }
-
-            const turno = {
-                paciente_id: Number(pacienteId), // 🔥 importante
-                fecha: fecha,
-                motivo: motivo
-            };
-
-            const res = await fetch("/turnos", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + localStorage.getItem("token")
-                },
-                body: JSON.stringify(turno)
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                mostrarToast(data.detail || "Error al crear turno ❌", "danger");
-                return;
-            }
-
-            mostrarToast("Turno creado correctamente ✅");
-
-            document.getElementById("fechaTurno").value = "";
-            document.getElementById("motivo").value = "";
-
-            await cargarPaciente(); // 🔥 clave
-        }
         async function crearNota() {
             // Usamos toISOString() para que sea 100% compatible con Python datetime
             const ahora = new Date();
