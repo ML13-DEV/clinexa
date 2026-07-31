@@ -5,7 +5,11 @@ from app.models.analisis import Analisis, AnalisisValor
 from app.schemas.analisis import AnalisisCreate, AnalisisUpdate
 from app.core.permissions import get_paciente_propio, get_registro_de_paciente_propio
 from app.core.dependencies import get_db, get_current_user, get_current_medico
-from app.especialidades.analisis_config import validar_analisis
+from app.especialidades.analisis_config import (
+    campos_computados,
+    recalcular_computados,
+    validar_analisis,
+)
 
 router = APIRouter(
     dependencies=[Depends(get_current_medico)]
@@ -66,10 +70,17 @@ def crear_analisis(
     paciente_id = payload.pop("paciente_id")
     fecha = payload.pop("fecha")
 
+    # Los campos computados no se aceptan desde el cliente: se ignora
+    # cualquier valor que mande (si lo manda) y se recalculan abajo.
+    for key in campos_computados(user["especialidad"]):
+        payload.pop(key, None)
+
     try:
         validar_analisis(user["especialidad"], payload)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
+
+    payload.update(recalcular_computados(user["especialidad"], payload))
 
     nuevo = Analisis(paciente_id=paciente_id, fecha=fecha)
     db.add(nuevo)
@@ -126,10 +137,23 @@ def actualizar_analisis(
     if "fecha" in cambios:
         analisis.fecha = cambios.pop("fecha")
 
+    # Los campos computados no se aceptan desde el cliente: se ignora
+    # cualquier valor que mande (si lo manda) y se recalculan abajo.
+    for key in campos_computados(user["especialidad"]):
+        cambios.pop(key, None)
+
     try:
         validar_analisis(user["especialidad"], cambios)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
+
+    # Vista mergeada (lo que ya estaba guardado + estos cambios) para
+    # recalcular con datos completos: un update parcial puede tocar solo
+    # circunferencia_cadera y necesita la circunferencia_cintura ya
+    # guardada para el indice cintura-cadera.
+    valores_actuales = _serializar(db, analisis)
+    valores_actuales.update(cambios)
+    cambios.update(recalcular_computados(user["especialidad"], valores_actuales))
 
     _actualizar_valores(db, analisis.id, cambios)
 

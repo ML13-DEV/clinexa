@@ -43,6 +43,7 @@ def obtener_analisis_especialidad(user = Depends(get_current_user)):
             "label": campo.label,
             "tipo": campo.tipo.value,
             "unidad": campo.unidad,
+            "computado": campo.computado,
         }
         for campo in analisis_de(user["especialidad"])
     ]
