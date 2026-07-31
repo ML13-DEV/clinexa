@@ -509,6 +509,7 @@
             const datosMedicos = document.getElementById("datosMedicos");
 
             datosMedicos.innerHTML = `
+               ${crearCard("localidad", "Localidad", data.paciente.localidad)}
                ${crearCard("sangrados", "Sangrados", data.paciente.sangrados)}
                 ${crearCard("trombosis", "Trombosis", data.paciente.trombosis)}
                 ${crearCard("alergias", "Alergias", data.paciente.alergias)}
