@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import APIRouter, Depends, Query, Request, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -102,6 +104,38 @@ def _distribucion_por_edad(db, usuario_id):
     ]
 
 
+def _primer_dia_hace_n_meses(n):
+    hoy = hoy_consultorio()
+    mes_total = hoy.month - 1 - n
+    anio = hoy.year + mes_total // 12
+    mes = mes_total % 12 + 1
+    return date(anio, mes, 1)
+
+
+def _pacientes_nuevos_por_mes(db, usuario_id, meses=6):
+    """Agrupa por (año, mes) de created_at con EXTRACT en vez de
+    date_trunc/strftime: EXTRACT lo traduce SQLAlchemy a algo válido tanto
+    en Postgres como en SQLite (los tests corren ahí), a diferencia de
+    date_trunc (solo Postgres) o strftime (solo SQLite)."""
+    anio = func.extract("year", Paciente.created_at)
+    mes = func.extract("month", Paciente.created_at)
+    desde = _primer_dia_hace_n_meses(meses - 1)
+
+    filas = (
+        db.query(anio.label("anio"), mes.label("mes"), func.count().label("cantidad"))
+        .filter(Paciente.usuario_id == usuario_id)
+        .filter(Paciente.created_at >= desde)
+        .group_by(anio, mes)
+        .order_by(anio, mes)
+        .all()
+    )
+
+    return [
+        {"mes": f"{int(anio):04d}-{int(mes):02d}", "cantidad": cantidad}
+        for anio, mes, cantidad in filas
+    ]
+
+
 # =========================
 # VISTA HTML (MUY IMPORTANTE ARRIBA)
 # =========================
@@ -196,7 +230,11 @@ def obtener_estadisticas_pacientes(
         "top_localidades": _top_texto_normalizado(
             db, user["id"], Paciente.localidad
         ),
+        "top_obras_sociales": _top_texto_normalizado(
+            db, user["id"], Paciente.obra_social
+        ),
         "rango_etario": _distribucion_por_edad(db, user["id"]),
+        "pacientes_nuevos_por_mes": _pacientes_nuevos_por_mes(db, user["id"]),
     }
 
 
