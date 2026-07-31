@@ -7,6 +7,7 @@ class PacienteBase(BaseModel):
     dni: str
     fecha_nacimiento: date
     telefono: str | None = None
+    localidad: str | None = None
     obra_social: str | None = None
     numero_afiliado: str | None = None
 
@@ -40,6 +41,7 @@ class PacienteUpdate(BaseModel):
     dni: str | None = None
     fecha_nacimiento: date | None = None
     telefono: str | None = None
+    localidad: str | None = None
     obra_social: str | None = None
     numero_afiliado: str | None = None
 
