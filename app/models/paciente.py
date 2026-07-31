@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, Text, Float
+from sqlalchemy import Column, Integer, String, Date, DateTime, Text, Float, func
 from app.database import Base
 from sqlalchemy.orm import relationship
 
@@ -14,6 +14,9 @@ class Paciente(Base):
     fecha_nacimiento = Column(Date)
     telefono = Column(String(30))
     localidad = Column(String(150))
+
+    # Metadata (para estadisticas, no se expone en el form de alta/edicion)
+    creado_en = Column(DateTime, server_default=func.now())
 
     # Obra social
     obra_social = Column(String(100))
