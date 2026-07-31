@@ -68,6 +68,21 @@
                 <canvas id="chartLocalidades" height="200"></canvas>
             </div>
         </div>
+        <div class="col-12 col-lg-6">
+            <div class="card p-3">
+                <h6 class="text-secondary">Top 5 obras sociales</h6>
+                <canvas id="chartObrasSociales" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card p-3">
+                <h6 class="text-secondary">Pacientes nuevos por mes</h6>
+                <canvas id="chartAltasPorMes" height="200"></canvas>
+            </div>
+        </div>
     </div>
 
     <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
@@ -105,6 +120,8 @@
         let chartDiagnosticos = null;
         let chartRangoEtario = null;
         let chartLocalidades = null;
+        let chartObrasSociales = null;
+        let chartAltasPorMes = null;
 
         function renderBarChart(actual, canvasId, labels, valores, color) {
             if (actual) actual.destroy();
@@ -164,6 +181,22 @@
                 stats.top_localidades.map(l => l.label),
                 stats.top_localidades.map(l => l.cantidad),
                 "#f59e0b"
+            );
+
+            chartObrasSociales = renderBarChart(
+                chartObrasSociales,
+                "chartObrasSociales",
+                stats.top_obras_sociales.map(o => o.label),
+                stats.top_obras_sociales.map(o => o.cantidad),
+                "#8b5cf6"
+            );
+
+            chartAltasPorMes = renderBarChart(
+                chartAltasPorMes,
+                "chartAltasPorMes",
+                stats.pacientes_nuevos_por_mes.map(m => m.mes),
+                stats.pacientes_nuevos_por_mes.map(m => m.cantidad),
+                "#14b8a6"
             );
         }
     </script>
