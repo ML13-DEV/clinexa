@@ -256,9 +256,13 @@
         // Catálogo de análisis de la especialidad del médico logueado (ver
         // GET /especialidades/analisis). analisisTexto son las keys de tipo
         // texto libre (hepatograma, otros_analisis, ...); todo lo que no
-        // esté ahí se trata como numérico.
+        // esté ahí se trata como numérico. analisisComputados son las keys
+        // que el backend recalcula solo (ej. indice_cintura_cadera): no se
+        // cargan a mano, ni en el form de alta ni en la edición inline de
+        // la tabla.
         let analisisEspecialidad = [];
         let analisisTexto = new Set();
+        let analisisComputados = new Set();
 
         // =========================
         // 🎨 RANGOS NORMALES
@@ -478,6 +482,9 @@
             analisisTexto = new Set(
                 analisisEspecialidad.filter(c => c.tipo === "texto").map(c => c.key)
             );
+            analisisComputados = new Set(
+                analisisEspecialidad.filter(c => c.computado).map(c => c.key)
+            );
 
             const rangosCargados = resRangos.ok ? await resRangos.json() : [];
             const rangosPorKey = Object.fromEntries(
@@ -490,7 +497,11 @@
                 analisisEspecialidad.map(c => [c.key, rangosPorKey[c.key] ?? { min: null, max: null }])
             );
 
-            const primerNumerico = analisisEspecialidad.find(c => c.tipo !== "texto");
+            // Se prefiere un campo no computado como selección inicial del
+            // gráfico: uno como indice_cintura_cadera puede no tener datos
+            // hasta que se carguen sus dos campos de entrada.
+            const primerNumerico = analisisEspecialidad.find(c => c.tipo !== "texto" && !c.computado)
+                ?? analisisEspecialidad.find(c => c.tipo !== "texto");
             campoActual = primerNumerico ? primerNumerico.key : (analisisEspecialidad[0]?.key ?? null);
 
             renderFormAnalisis();
@@ -506,6 +517,16 @@
 
             contenedor.innerHTML = analisisEspecialidad.map(campo => {
                 const label = labelConUnidad(campo);
+
+                if (campo.computado) {
+                    return `<div class="col">
+                        <label class="form-label small text-muted mb-1">${label}</label>
+                        <div class="form-control-plaintext small text-muted fst-italic">
+                            Se calcula automáticamente
+                        </div>
+                    </div>`;
+                }
+
                 const input = campo.tipo === "texto"
                     ? `<textarea id="${campo.key}" class="form-control" rows="1"></textarea>`
                     : `<input id="${campo.key}" class="form-control">`;
@@ -573,7 +594,7 @@
                 ${crearCard("alergias", "Alergias", data.paciente.alergias)}
                 ${crearCard("medico_cabecera", "Médico de cabecera", data.paciente.medico_cabecera)}
                 ${cardsEspecialidad}
-                ${crearCardNumero("peso", "Peso (kg)", data.paciente.peso)}
+                ${crearCardNumero("peso", "Peso Inicial (kg)", data.paciente.peso)}
                 ${crearCardNumero("talla", "Talla (cm)", data.paciente.talla)}
                 ${crearCardSoloLectura("IMC", data.paciente.imc)}
                 ${crearCard("diagnostico_principal", "Diagnóstico principal", data.paciente.diagnostico_principal)}
@@ -1048,6 +1069,8 @@
             };
 
             analisisEspecialidad.forEach(campo => {
+                if (analisisComputados.has(campo.key)) return; // no hay input: lo calcula el backend
+
                 data[campo.key] = analisisTexto.has(campo.key)
                     ? getValueText(campo.key)
                     : getValue(campo.key);
@@ -1266,6 +1289,12 @@
                         >
                     `;
                 }
+                // 🔥 CAMPOS COMPUTADOS: no se editan a mano, el backend los
+                // recalcula solo. Queda como texto (no-op).
+                else if (analisisComputados.has(campo)) {
+                    // nada que hacer
+                }
+
                 // 🔥 CAMPOS DE TEXTO LARGO (texto libre)
                 else if (analisisTexto.has(campo)) {
                     td.innerHTML = `
