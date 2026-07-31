@@ -83,6 +83,7 @@
                 <div class="modal-body">
 
                     <input id="edit_telefono" class="form-control mb-2" placeholder="Teléfono">
+                    <input id="edit_localidad" class="form-control mb-2" placeholder="Localidad">
 
                     <input id="edit_obra_social" class="form-control mb-2" placeholder="Obra social">
                     <input id="edit_numero_afiliado" class="form-control mb-2" placeholder="Número afiliado">
@@ -478,6 +479,7 @@
 
             // cargar datos
             document.getElementById("edit_telefono").value = p.telefono || "";
+            document.getElementById("edit_localidad").value = p.localidad || "";
             document.getElementById("edit_obra_social").value = p.obra_social || "";
             document.getElementById("edit_numero_afiliado").value = p.numero_afiliado || "";
             document.getElementById("edit_alergias").value = p.alergias || "";
@@ -527,6 +529,7 @@
 
             const paciente = {
                 telefono: document.getElementById("edit_telefono").value,
+                localidad: document.getElementById("edit_localidad").value,
 
                 obra_social: document.getElementById("edit_obra_social").value,
                 numero_afiliado: document.getElementById("edit_numero_afiliado").value,
