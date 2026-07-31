@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query, Request, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 
 from app.models.paciente import Paciente
 from app.models.turnos import Turno
@@ -37,6 +37,69 @@ def calcular_imc(peso, talla):
     if talla_m <= 0:
         return None
     return round(peso / (talla_m ** 2), 2)
+
+
+# Rangos etarios fijos para /pacientes/estadisticas.
+RANGOS_ETARIOS = [
+    ("0-17", 0, 17),
+    ("18-30", 18, 30),
+    ("31-45", 31, 45),
+    ("46-60", 46, 60),
+    ("61+", 61, None),
+]
+
+
+def _rango_etario(edad):
+    for etiqueta, minimo, maximo in RANGOS_ETARIOS:
+        if maximo is None:
+            if edad >= minimo:
+                return etiqueta
+        elif minimo <= edad <= maximo:
+            return etiqueta
+    return RANGOS_ETARIOS[0][0]
+
+
+def _top_texto_normalizado(db, usuario_id, columna, limite=5):
+    """Agrupa un campo de texto libre ignorando mayúsculas/espacios
+    (TRIM+LOWER, portable a SQLite y Postgres). La etiqueta se muestra en
+    Python con .title() sobre las `limite` filas ya agrupadas en SQL —
+    evita INITCAP, que no existe en SQLite (los tests corren ahí)."""
+    clave = func.trim(func.lower(columna))
+
+    filas = (
+        db.query(clave.label("clave"), func.count().label("cantidad"))
+        .filter(Paciente.usuario_id == usuario_id)
+        .filter(columna.isnot(None))
+        .filter(func.trim(columna) != "")
+        .group_by(clave)
+        .order_by(func.count().desc())
+        .limit(limite)
+        .all()
+    )
+
+    return [{"label": clave.title(), "cantidad": cantidad} for clave, cantidad in filas]
+
+
+def _distribucion_por_edad(db, usuario_id):
+    """Trae solo fecha_nacimiento (no el paciente completo) y reusa
+    calcular_edad() para agrupar en rangos fijos."""
+    fechas = (
+        db.query(Paciente.fecha_nacimiento)
+        .filter(Paciente.usuario_id == usuario_id)
+        .filter(Paciente.fecha_nacimiento.isnot(None))
+        .all()
+    )
+
+    conteos = {etiqueta: 0 for etiqueta, _, _ in RANGOS_ETARIOS}
+
+    for (fecha_nacimiento,) in fechas:
+        edad = calcular_edad(fecha_nacimiento)
+        conteos[_rango_etario(edad)] += 1
+
+    return [
+        {"rango": etiqueta, "cantidad": conteos[etiqueta]}
+        for etiqueta, _, _ in RANGOS_ETARIOS
+    ]
 
 
 # =========================
@@ -106,6 +169,35 @@ def listar_pacientes(
     pacientes = query.order_by(Paciente.id.desc()).all()
 
     return pacientes
+
+
+@router.get("/pacientes/estadisticas")
+def obtener_estadisticas_pacientes(
+    db: Session = Depends(get_db),
+    user = Depends(get_current_medico)
+):
+    """Estadisticas de los propios pacientes del medico logueado (no
+    confundir con /owner/estadisticas, que es a nivel plataforma). Todo
+    via COUNT/GROUP BY filtrado por usuario_id, salvo el rango etario que
+    trae solo fecha_nacimiento y bucketiza en Python reusando
+    calcular_edad()."""
+
+    total_pacientes = (
+        db.query(func.count(Paciente.id))
+        .filter(Paciente.usuario_id == user["id"])
+        .scalar()
+    )
+
+    return {
+        "total_pacientes": total_pacientes,
+        "top_diagnosticos": _top_texto_normalizado(
+            db, user["id"], Paciente.diagnostico_principal
+        ),
+        "top_localidades": _top_texto_normalizado(
+            db, user["id"], Paciente.localidad
+        ),
+        "rango_etario": _distribucion_por_edad(db, user["id"]),
+    }
 
 
 @router.get("/pacientes/{paciente_id}")
