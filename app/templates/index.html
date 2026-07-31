@@ -5,6 +5,7 @@
     <title>DataSoma Health - Inicio</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/static/js/darkmode.js"></script>
     <link rel="stylesheet" href="/static/css/styles.css">
     <script>
@@ -32,10 +33,40 @@
 
         <h3>📊 Dashboard</h3>
 
-        <div id="stats" class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3 mb-4"></div>
+        <div id="statsResumen" class="row row-cols-1 row-cols-md-2 g-3 mb-3"></div>
 
-        <h3>📅 Turnos de hoy</h3>
-        <ul id="turnosHoy" class="list-group mb-4"></ul>
+        <div class="row row-cols-1 row-cols-lg-2 g-3 mb-4">
+            <div class="col">
+                <div class="card shadow-sm p-3 border-0">
+                    <h6 class="text-muted mb-2">Top 5 diagnósticos</h6>
+                    <canvas id="chartDiagnosticos" height="220"></canvas>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card shadow-sm p-3 border-0">
+                    <h6 class="text-muted mb-2">Distribución por rango etario</h6>
+                    <canvas id="chartRangoEtario" height="220"></canvas>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card shadow-sm p-3 border-0">
+                    <h6 class="text-muted mb-2">Top 5 localidades</h6>
+                    <canvas id="chartLocalidades" height="220"></canvas>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card shadow-sm p-3 border-0">
+                    <h6 class="text-muted mb-2">Top 5 obras sociales</h6>
+                    <canvas id="chartObrasSociales" height="220"></canvas>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card shadow-sm p-3 border-0">
+                    <h6 class="text-muted mb-2">Pacientes nuevos por mes</h6>
+                    <canvas id="chartAltasPorMes" height="220"></canvas>
+                </div>
+            </div>
+        </div>
 
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
             <h3>Pacientes</h3>
@@ -54,19 +85,6 @@
 
         <ul id="lista" class="list-group"></ul>
 
-        <br>
-
-        <h3>Turnos recientes</h3>
-
-    <ul id="ultimosTurnos" class="list-group"></ul>
-
-    <button class="btn btn-secondary mt-2 w-100 w-md-auto" onclick="verMasTurnos()">
-        Ver más
-    </button>
-
-   <br> 
-
-    <br>
     </div>
 
     <div class="modal fade" id="modalPaciente" tabindex="-1">
@@ -82,6 +100,7 @@
                 <div class="modal-body">
 
                     <input id="edit_telefono" class="form-control mb-2" placeholder="Teléfono">
+                    <input id="edit_localidad" class="form-control mb-2" placeholder="Localidad">
 
                     <input id="edit_obra_social" class="form-control mb-2" placeholder="Obra social">
                     <input id="edit_numero_afiliado" class="form-control mb-2" placeholder="Número afiliado">
@@ -171,21 +190,6 @@
             window.location.href = "/login";
         }
 
-        let limiteTurnos = 5;      
-
-        let filtroActual = "todos";
-
-        function formatearFecha(fecha) {
-            return new Date(fecha).toLocaleString("es-AR", {
-                timeZone: "America/Argentina/Buenos_Aires",
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: false
-            });
-        }
         async function cargarPacientes(search = "") {
             const res = await fetch(`/pacientes?search=${search}`, {
                 headers: {
@@ -280,168 +284,109 @@
         }*/
 
 
-        async function cargarTurnosRecientes() {
-            const res = await fetch("/turnos/recientes", {
-                headers: {
-                    "Authorization": "Bearer " + localStorage.getItem("token")
-                }
-            });
-            const data = await res.json();
+        let graficosStats = {};
 
-            const lista = document.getElementById("ultimosTurnos");
-            lista.innerHTML = "";
-
-            data.slice(0, limiteTurnos).forEach(t => {
-                const li = document.createElement("li");
-                const nombre = t.paciente
-                    ? `${t.paciente.nombre} ${t.paciente.apellido}`
-                    : (t.nombre_temp || "Sin paciente");
-
-                li.className = "list-group-item";
-
-                li.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong class="text-capitalize">${nombre}</strong><br>
-                            <small class="text-muted">${formatearFecha(t.fecha)}</small>
-                        </div>
-
-                        <div>
-                            ${
-                                t.estado === "pendiente"
-                                ? `<span class="badge bg-warning text-dark">Pendiente</span>`
-                                : `<span class="badge bg-success">Atendido</span>`
-                            }
-                        </div>
-                    </div>
-                
-                    <div class="turno-fecha">
-                        ${tiempoRelativo(t.fecha)}
-                    </div>
-                `;
-
-                li.onclick = () => {
-                    if (t.paciente_id) {
-                        window.location.href = `/paciente/${t.paciente_id}`;
-                    }
-                };
-
-                lista.appendChild(li);
-            });
-
+        function colorTextoChart() {
+            return document.body.classList.contains("dark-mode") ? "#e2e8f0" : "#334155";
         }
 
-
-        async function cargarTurnosHoy() {
-            const res = await fetch("/turnos/hoy", {
-                headers: {
-                    "Authorization": "Bearer " + localStorage.getItem("token")
-                }
-            });
-            const data = await res.json();
-
-            const lista = document.getElementById("turnosHoy");
-            lista.innerHTML = "";
-
-            data.slice(0, limiteTurnos).forEach(t => {
-
-                if (filtroActual !== "todos" && t.estado !== filtroActual) {
-                    return;
-                }
-
-                const li = document.createElement("li"); // 🔥 FALTABA ESTO
-
-                const nombre = t.paciente
-                    ? `${t.paciente.nombre} ${t.paciente.apellido}`
-                    : (t.nombre_temp || "Sin paciente");
-
-                li.className = "list-group-item";
-
-                li.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong class="text-capitalize">${nombre}</strong><br>
-                            <small class="text-muted">${formatearFecha(t.fecha)}</small>
-                        </div>
-
-                        <div>
-                            ${
-                                t.estado === "pendiente"
-                                ? `<span class="badge bg-warning text-dark">Pendiente</span>`
-                                : `<span class="badge bg-success">Atendido</span>`
-                            }
-                        </div>
-                    </div>
-                `;
-
-                if (t.estado === "pendiente") {
-                    li.style.borderLeft = "4px solid orange";
-                }
-
-                if (t.estado === "atendido") {
-                    li.style.borderLeft = "4px solid green";
-                }
-
-                li.onclick = () => {
-                    if (t.paciente_id) {
-                        window.location.href = `/paciente/${t.paciente_id}`;
-                    }
-                };
-
-                lista.appendChild(li);
-            });
+        function colorGridChart() {
+            return document.body.classList.contains("dark-mode")
+                ? "rgba(226, 232, 240, 0.1)"
+                : "rgba(51, 65, 85, 0.1)";
         }
 
+        function renderBarChart(canvasId, labels, valores) {
+            if (graficosStats[canvasId]) {
+                graficosStats[canvasId].destroy();
+            }
+
+            graficosStats[canvasId] = new Chart(document.getElementById(canvasId), {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: valores,
+                        backgroundColor: "#2563eb",
+                        borderRadius: 4,
+                        maxBarThickness: 40
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: colorTextoChart() },
+                            grid: { display: false }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: colorTextoChart(), precision: 0 },
+                            grid: { color: colorGridChart() }
+                        }
+                    }
+                }
+            });
+        }
 
         async function cargarStats() {
-            const res = await fetch("/turnos/stats", {
+            const res = await fetch("/pacientes/estadisticas", {
                 headers: {
                     "Authorization": "Bearer " + localStorage.getItem("token")
                 }
             });
             const data = await res.json();
 
-            const stats = document.getElementById("stats");
+            const resumen = document.getElementById("statsResumen");
 
-            stats.innerHTML = `
-                <div class="col-md-3">
-                    <div class="card shadow-sm p-3 border-0 stat-card" onclick="cambiarFiltro('todos')">
-                        <small class="text-muted">📅 Hoy</small>
-                        <h2>${data.total}</h2>
+            resumen.innerHTML = `
+                <div class="col">
+                    <div class="card shadow-sm p-3 border-0 stat-card">
+                        <small class="text-muted">🧑‍⚕️ Total de pacientes</small>
+                        <h2>${data.total_pacientes}</h2>
                     </div>
                 </div>
 
-                <div class="col-md-3">
-                    <div class="card shadow-sm p-3 border-0 stat-card" onclick="cambiarFiltro('pendiente')">
-                        <small class="text-warning">🟡 Pendientes</small>
-                        <h2>${data.pendientes}</h2>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="card shadow-sm p-3 border-0 stat-card" onclick="cambiarFiltro('atendido')">
-                        <small class="text-success">🟢 Atendidos</small>
-                        <h2>${data.atendidos}</h2>
-                    </div>
-                </div>
-
-                <!-- 🔥 NUEVA CARD -->
-                <div class="col-md-3">
-                    <div class="card shadow-sm p-3 border-0 stat-card agenda-card"
-                        onclick="window.location.href='/agenda'">
-
-                        <small class="text-muted">📅 Agenda</small>
-                        <h4>Ver agenda</h4>
-
+                <div class="col">
+                    <div class="card shadow-sm p-3 border-0 stat-card">
+                        <small class="text-muted">⏰ Sin seguimiento (+6 meses)</small>
+                        <h2>${data.pacientes_sin_seguimiento}</h2>
                     </div>
                 </div>
             `;
-        }
-        
 
-        function cambiarFiltro(filtro) {
-            filtroActual = filtro;
-            cargarTurnosHoy();
+            renderBarChart(
+                "chartDiagnosticos",
+                data.top_diagnosticos.map(d => d.label),
+                data.top_diagnosticos.map(d => d.cantidad)
+            );
+
+            renderBarChart(
+                "chartRangoEtario",
+                data.rango_etario.map(r => r.rango),
+                data.rango_etario.map(r => r.cantidad)
+            );
+
+            renderBarChart(
+                "chartLocalidades",
+                data.top_localidades.map(l => l.label),
+                data.top_localidades.map(l => l.cantidad)
+            );
+
+            renderBarChart(
+                "chartObrasSociales",
+                data.top_obras_sociales.map(o => o.label),
+                data.top_obras_sociales.map(o => o.cantidad)
+            );
+
+            renderBarChart(
+                "chartAltasPorMes",
+                data.pacientes_nuevos_por_mes.map(m => m.mes),
+                data.pacientes_nuevos_por_mes.map(m => m.cantidad)
+            );
         }
 
         function eliminarPaciente(id) {
@@ -480,6 +425,7 @@
 
             // cargar datos
             document.getElementById("edit_telefono").value = p.telefono || "";
+            document.getElementById("edit_localidad").value = p.localidad || "";
             document.getElementById("edit_obra_social").value = p.obra_social || "";
             document.getElementById("edit_numero_afiliado").value = p.numero_afiliado || "";
             document.getElementById("edit_sangrados").value = p.sangrados || "";
@@ -532,6 +478,7 @@
 
             const paciente = {
                 telefono: document.getElementById("edit_telefono").value,
+                localidad: document.getElementById("edit_localidad").value,
 
                 obra_social: document.getElementById("edit_obra_social").value,
                 numero_afiliado: document.getElementById("edit_numero_afiliado").value,
@@ -586,8 +533,6 @@
 
 
         cargarStats();
-        cargarTurnosHoy();
-        cargarTurnosRecientes();
         cargarPacientes();
 
         function mostrarToast(mensaje, tipo = "success") {
@@ -603,40 +548,6 @@
             const toast = new bootstrap.Toast(toastEl);
             toast.show();
         }
-
-        function verMasTurnos() {
-            console.log("limite:", limiteTurnos);
-            limiteTurnos += 5;
-            cargarTurnosHoy();
-            cargarTurnosRecientes();
-        }
-
-        function tiempoRelativo(fecha) {
-            const ahora = new Date();
-            const f = new Date(fecha);
-
-            const diffMs = f - ahora; // 🔥 ahora invertido (para futuro)
-            const diffMin = Math.floor(Math.abs(diffMs) / 60000);
-            const diffHoras = Math.floor(diffMin / 60);
-            const diffDias = Math.floor(diffHoras / 24);
-
-            // 🔥 FUTURO
-            if (diffMs > 0) {
-                if (diffMin < 60) return `en ${diffMin} min`;
-                if (diffHoras < 24) return `en ${diffHoras} h`;
-                return `en ${diffDias} días`;
-            }
-
-            // 🔥 PASADO
-            if (diffMin < 1) return "recién";
-            if (diffMin < 60) return `hace ${diffMin} min`;
-            if (diffHoras < 24) return `hace ${diffHoras} h`;
-            return `hace ${diffDias} días`;
-        }
-
-        setInterval(() => {
-            cargarTurnosRecientes(); // 🔥 refresca solo esa parte
-        }, 60000);
 
         function mostrarConfirm(mensaje, callbackConfirm) {
 
