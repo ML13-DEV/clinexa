@@ -35,6 +35,19 @@ class Settings(BaseSettings):
     # tipeo humano, restrictivo para fuerza bruta contra bcrypt.
     login_rate_limit: str = "5/minute"
 
+    # Resend (resend.com) para el mail de reset de contraseña. Con el
+    # dominio de pruebas (default de from) solo se puede mandar a la
+    # dirección de la propia cuenta de Resend, hasta verificar un
+    # dominio propio.
+    resend_api_key: str = ""
+    resend_from_email: str = "onboarding@resend.dev"
+
+    # Base pública de la app (sin / final), para armar el link del mail
+    # de reset. En Render, setear al dominio real del Web Service.
+    app_base_url: str = "http://localhost:8000"
+
+    reset_password_token_expire_minutes: int = 30
+
     @property
     def allowed_origins_list(self) -> list[str]:
         return [o.strip() for o in self.allowed_origins.split(",") if o.strip()]

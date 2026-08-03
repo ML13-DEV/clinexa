@@ -48,6 +48,14 @@ class Usuario(Base):
     # tanto en /registro como en el alta manual del owner.
     nombre = Column(String(150), nullable=True)
 
+    # Dirección real para mandar el mail de reset de contraseña.
+    # Separada de `username` porque este último no está garantizado que
+    # sea un email (ej. usuarios de seed como "drhemato"). Nullable por
+    # lo mismo que `nombre`: las cuentas creadas antes de este campo no
+    # lo tienen hasta que el owner o el propio médico lo carguen;
+    # requerido de acá en más en /registro.
+    email = Column(String(255), nullable=True)
+
     # String, no Enum de SQLAlchemy a propósito: un Enum mapea a un tipo
     # ENUM nativo en Postgres y exigiría migrar el tipo de columna. La
     # validación real de valores permitidos ya la hace RolUsuario del

@@ -165,11 +165,19 @@ especialidad sin declararlas una por una en el schema.
 - **Sin tests de UI automatizados**: la verificación en browser se hizo
   con Playwright ad hoc en cada sesión, no quedó como suite de regresión.
   Los 19 tests de pytest son solo de backend.
-- **Reset de contraseña sin implementar**: si un médico se olvida la
-  contraseña, hoy no hay forma de recuperarla sin que el owner entre a la
-  base a mano. Falta decidir proveedor de envío de mail (no hay ninguna
-  integración hoy) antes de poder implementar el flujo de token +
-  confirmación.
+- **Reset de contraseña implementado** (`/olvide-password`,
+  `/reset-password`, `app/core/mail.py`): mail transaccional vía Resend
+  (`RESEND_API_KEY`/`RESEND_FROM_EMAIL` en Settings). El token de reset
+  es un JWT de corta duración (`RESET_PASSWORD_TOKEN_EXPIRE_MINUTES`,
+  30 min default) sin tabla propia: lleva un fingerprint del hash de
+  contraseña vigente al emitirlo, así que se auto-invalida apenas se usa
+  una vez (el hash cambia). `get_current_user` rechaza cualquier token
+  con `purpose` seteado, para que un link de reset interceptado no sirva
+  como sesión. Requiere que `Usuario.email` esté cargado (columna nueva,
+  nullable — las cuentas viejas no lo tienen hasta que el owner o el
+  médico lo carguen); sin domino propio verificado en Resend, el sandbox
+  `onboarding@resend.dev` solo entrega a la dirección de la cuenta de
+  Resend, no a destinatarios arbitrarios.
 - **CORS y rate limiting sí abordados** (`app/main.py`,
   `app/core/limiter.py`): `CORSMiddleware` restrictivo, con orígenes
   leídos de `ALLOWED_ORIGINS` (sin nada seteado, ningún origen cruzado

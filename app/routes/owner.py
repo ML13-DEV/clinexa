@@ -30,6 +30,7 @@ def _con_cantidad_pacientes(db: Session, usuario: Usuario) -> UsuarioOut:
         rol=usuario.rol,
         especialidad=usuario.especialidad,
         estado=usuario.estado,
+        email=usuario.email,
         cantidad_pacientes=cantidad or 0,
     )
 
@@ -62,6 +63,7 @@ def crear_usuario(
         password=hash_password(usuario.password),
         rol=usuario.rol,
         especialidad=usuario.especialidad,
+        email=usuario.email,
         # Si el owner lo da de alta a mano, ya esta aprobado por
         # definicion - no pasa por la cola de pendientes de /registro.
         estado=EstadoCuenta.ACTIVO,
@@ -96,6 +98,7 @@ def listar_usuarios(
             rol=usuario.rol,
             especialidad=usuario.especialidad,
             estado=usuario.estado,
+            email=usuario.email,
             cantidad_pacientes=cantidad,
         )
         for usuario, cantidad in resultados

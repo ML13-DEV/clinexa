@@ -36,6 +36,7 @@
                     <tr>
                         <th>Nombre</th>
                         <th>Usuario</th>
+                        <th>Email</th>
                         <th>Especialidad</th>
                         <th>Acciones</th>
                     </tr>
@@ -59,6 +60,9 @@
                 </div>
                 <div class="col-12 col-md-3">
                     <input id="nuevo_password" type="password" class="form-control" placeholder="Contraseña">
+                </div>
+                <div class="col-12 col-md-3">
+                    <input id="nuevo_email" type="email" class="form-control" placeholder="Email (opcional)">
                 </div>
                 <div class="col-12 col-md-3">
                     <select id="nuevo_especialidad" class="form-control"></select>
@@ -114,6 +118,7 @@
                     <tr>
                         <th>Nombre</th>
                         <th>Usuario</th>
+                        <th>Email</th>
                         <th>Especialidad</th>
                         <th>Pacientes</th>
                         <th>Estado</th>
@@ -274,6 +279,7 @@
                 <tr>
                     <td>${m.nombre ?? "-"}</td>
                     <td>${m.username}</td>
+                    <td>${m.email ?? "-"}</td>
                     <td class="text-capitalize">${m.especialidad ?? "-"}</td>
                     <td>
                         <div class="d-flex gap-2">
@@ -296,6 +302,10 @@
                 <tr>
                     <td>${m.nombre ?? "-"}</td>
                     <td>${m.username}</td>
+                    <td>
+                        <input class="form-control form-control-sm" type="email" value="${m.email ?? ""}"
+                            placeholder="sin email" onchange="actualizarEmail(${m.id}, this.value)">
+                    </td>
                     <td>
                         <select class="form-control form-control-sm" onchange="reasignarEspecialidad(${m.id}, this.value)">
                             ${opcionesEspecialidad(m.especialidad)}
@@ -320,6 +330,7 @@
             const nombre = document.getElementById("nuevo_nombre").value.trim();
             const username = document.getElementById("nuevo_username").value.trim();
             const password = document.getElementById("nuevo_password").value;
+            const email = document.getElementById("nuevo_email").value.trim();
             const especialidad = document.getElementById("nuevo_especialidad").value;
 
             if (!nombre || !username || !password) {
@@ -330,7 +341,7 @@
             const res = await fetch("/owner/usuarios", {
                 method: "POST",
                 headers: authHeaders({ "Content-Type": "application/json" }),
-                body: JSON.stringify({ nombre, username, password, rol: "medico", especialidad })
+                body: JSON.stringify({ nombre, username, password, email: email || null, rol: "medico", especialidad })
             });
 
             const data = await res.json();
@@ -344,6 +355,7 @@
             document.getElementById("nuevo_nombre").value = "";
             document.getElementById("nuevo_username").value = "";
             document.getElementById("nuevo_password").value = "";
+            document.getElementById("nuevo_email").value = "";
 
             await cargarMedicos();
             await cargarEstadisticas();
@@ -380,6 +392,10 @@
 
         function reasignarEspecialidad(id, especialidad) {
             actualizarMedico(id, { especialidad });
+        }
+
+        function actualizarEmail(id, email) {
+            actualizarMedico(id, { email: email.trim() || null });
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -13,6 +13,7 @@ def _registrar(client, username="drnuevo", especialidad="hematologia"):
         json={
             "nombre": "Dr. Nuevo",
             "username": username,
+            "email": f"{username}@example.com",
             "password": "test1234",
             "especialidad": especialidad,
         },
@@ -47,6 +48,7 @@ def test_registro_ignora_rol_enviado_por_el_cliente(client, db_session):
         json={
             "nombre": "Intento Owner",
             "username": "intento_owner",
+            "email": "intento_owner@example.com",
             "password": "test1234",
             "especialidad": "hematologia",
             "rol": "owner",
@@ -65,6 +67,7 @@ def test_registro_rechaza_especialidad_invalida(client):
         json={
             "nombre": "X",
             "username": "drinvalido",
+            "email": "drinvalido@example.com",
             "password": "test1234",
             "especialidad": "no_existe",
         },

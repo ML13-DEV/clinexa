@@ -12,11 +12,13 @@ class UsuarioCreate(BaseModel):
     password: str
     rol: RolUsuario
     especialidad: str | None = None
+    email: str | None = None
 
 
 class UsuarioUpdate(BaseModel):
     especialidad: str | None = None
     estado: EstadoCuenta | None = None
+    email: str | None = None
 
 
 class UsuarioOut(BaseModel):
@@ -26,6 +28,7 @@ class UsuarioOut(BaseModel):
     rol: str
     especialidad: str | None = None
     estado: str
+    email: str | None = None
     cantidad_pacientes: int = 0
 
     class Config:
@@ -41,3 +44,14 @@ class RegistroCreate(BaseModel):
     username: str
     password: str
     especialidad: str
+    email: str
+
+
+class SolicitudReset(BaseModel):
+    """username o email: lo que el médico tenga a mano."""
+    identificador: str
+
+
+class ConfirmarReset(BaseModel):
+    token: str
+    password_nueva: str

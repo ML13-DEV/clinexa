@@ -34,6 +34,13 @@ def get_current_user(
     except JWTError:
         raise HTTPException(status_code=401, detail="Token inválido")
 
+    # Los tokens de reset de contraseña (ver crear_token_reset) llevan un
+    # "purpose" que un token de sesión normal nunca tiene: si alguien
+    # intercepta un link de reset, no debe poder usarlo también como
+    # sesión autenticada.
+    if payload.get("purpose"):
+        raise HTTPException(status_code=401, detail="Token inválido")
+
     usuario = db.query(Usuario).filter(Usuario.id == payload.get("id")).first()
     if not usuario or usuario.estado != EstadoCuenta.ACTIVO:
         raise HTTPException(status_code=403, detail="Tu cuenta no está activa")

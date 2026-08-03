@@ -1,15 +1,24 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from jose import JWTError
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.dependencies import get_db
 from app.core.limiter import limiter
-from app.core.security import verify_password, hash_password, crear_token
+from app.core.mail import enviar_mail_reset
+from app.core.security import (
+    crear_token,
+    crear_token_reset,
+    decode_token,
+    hash_password,
+    verificar_token_reset,
+    verify_password,
+)
 from app.especialidades.config import CAMPOS_POR_ESPECIALIDAD
 from app.models.usuario import EstadoCuenta, RolUsuario, Usuario
-from app.schemas.usuario import LoginSchema, RegistroCreate
+from app.schemas.usuario import ConfirmarReset, LoginSchema, RegistroCreate, SolicitudReset
 
 router = APIRouter()
 
@@ -73,9 +82,54 @@ def registro(data: RegistroCreate, db: Session = Depends(get_db)):
         password=hash_password(data.password),
         rol=RolUsuario.MEDICO,
         especialidad=data.especialidad,
+        email=data.email,
         estado=EstadoCuenta.PENDIENTE,
     )
     db.add(nuevo)
     db.commit()
 
     return {"mensaje": "Registro recibido. Tu cuenta va a quedar pendiente de aprobación."}
+
+
+@router.get("/olvide-password", response_class=HTMLResponse)
+def olvide_password_page(request: Request):
+    return templates.TemplateResponse(request, "olvide_password.html", {})
+
+
+@router.post("/olvide-password")
+def solicitar_reset(data: SolicitudReset, db: Session = Depends(get_db)):
+    """Mismo mensaje exista o no la cuenta, y tenga o no email cargado:
+    no hay que darle a quien pregunta ninguna señal de qué usuarios
+    existen (user enumeration)."""
+    usuario = db.query(Usuario).filter(
+        (Usuario.username == data.identificador) | (Usuario.email == data.identificador)
+    ).first()
+
+    if usuario and usuario.email:
+        token = crear_token_reset(usuario.id, usuario.password)
+        link = f"{settings.app_base_url}/reset-password?token={token}"
+        enviar_mail_reset(usuario.email, usuario.nombre, link)
+
+    return {"mensaje": "Si el usuario existe y tiene un email cargado, te enviamos un mail con instrucciones."}
+
+
+@router.get("/reset-password", response_class=HTMLResponse)
+def reset_password_page(request: Request):
+    return templates.TemplateResponse(request, "resetear_password.html", {})
+
+
+@router.post("/reset-password")
+def confirmar_reset(data: ConfirmarReset, db: Session = Depends(get_db)):
+    try:
+        payload = decode_token(data.token)
+    except JWTError:
+        raise HTTPException(status_code=400, detail="Link inválido o vencido")
+
+    usuario = db.query(Usuario).filter(Usuario.id == payload.get("id")).first()
+    if not usuario or not verificar_token_reset(data.token, usuario.id, usuario.password):
+        raise HTTPException(status_code=400, detail="Link inválido o vencido")
+
+    usuario.password = hash_password(data.password_nueva)
+    db.commit()
+
+    return {"mensaje": "Contraseña actualizada. Ya podés iniciar sesión."}
