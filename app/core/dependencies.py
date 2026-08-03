@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import decode_token
 from app.database import SessionLocal
+from app.models.usuario import EstadoCuenta, Usuario
 
 security = HTTPBearer()
 
@@ -17,12 +18,27 @@ def get_db() -> Session:
         db.close()
 
 
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
-    """Devuelve el payload del JWT (sub, id, rol, especialidad)."""
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Devuelve el payload del JWT (sub, id, rol, especialidad).
+
+    Además vuelve a consultar la cuenta contra la base en cada request
+    (no solo al loguear): si el owner suspende/rechaza a alguien con una
+    sesión ya abierta, el corte de acceso es inmediato, no recién cuando
+    el JWT (24hs) expire. Necesario para la Fase B (pago vencido = pierde
+    acceso ya, sin esperar)."""
     try:
-        return decode_token(credentials.credentials)
+        payload = decode_token(credentials.credentials)
     except JWTError:
         raise HTTPException(status_code=401, detail="Token inválido")
+
+    usuario = db.query(Usuario).filter(Usuario.id == payload.get("id")).first()
+    if not usuario or usuario.estado != EstadoCuenta.ACTIVO:
+        raise HTTPException(status_code=403, detail="Tu cuenta no está activa")
+
+    return payload
 
 
 def get_current_owner(user: dict = Depends(get_current_user)) -> dict:

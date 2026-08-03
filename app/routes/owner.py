@@ -9,7 +9,7 @@ from app.core.security import hash_password
 from app.models.analisis import Analisis
 from app.models.nota import Nota
 from app.models.paciente import Paciente
-from app.models.usuario import RolUsuario, Usuario
+from app.models.usuario import EstadoCuenta, RolUsuario, Usuario
 from app.schemas.usuario import UsuarioCreate, UsuarioOut, UsuarioUpdate
 
 router = APIRouter(prefix="/owner", tags=["Owner"])
@@ -25,10 +25,11 @@ def _con_cantidad_pacientes(db: Session, usuario: Usuario) -> UsuarioOut:
     )
     return UsuarioOut(
         id=usuario.id,
+        nombre=usuario.nombre,
         username=usuario.username,
         rol=usuario.rol,
         especialidad=usuario.especialidad,
-        activo=usuario.activo,
+        estado=usuario.estado,
         cantidad_pacientes=cantidad or 0,
     )
 
@@ -56,11 +57,14 @@ def crear_usuario(
         raise HTTPException(status_code=400, detail="Usuario ya existe")
 
     nuevo = Usuario(
+        nombre=usuario.nombre,
         username=usuario.username,
         password=hash_password(usuario.password),
         rol=usuario.rol,
         especialidad=usuario.especialidad,
-        activo=True
+        # Si el owner lo da de alta a mano, ya esta aprobado por
+        # definicion - no pasa por la cola de pendientes de /registro.
+        estado=EstadoCuenta.ACTIVO,
     )
 
     db.add(nuevo)
@@ -87,10 +91,11 @@ def listar_usuarios(
     return [
         UsuarioOut(
             id=usuario.id,
+            nombre=usuario.nombre,
             username=usuario.username,
             rol=usuario.rol,
             especialidad=usuario.especialidad,
-            activo=usuario.activo,
+            estado=usuario.estado,
             cantidad_pacientes=cantidad,
         )
         for usuario, cantidad in resultados
@@ -136,7 +141,7 @@ def obtener_estadisticas(
     )
     medicos_activos = (
         db.query(func.count(Usuario.id))
-        .filter(Usuario.rol == RolUsuario.MEDICO, Usuario.activo.is_(True))
+        .filter(Usuario.rol == RolUsuario.MEDICO, Usuario.estado == EstadoCuenta.ACTIVO)
         .scalar()
     )
     medicos_por_especialidad = dict(

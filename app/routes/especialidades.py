@@ -10,9 +10,10 @@ router = APIRouter()
 
 
 @router.get("/especialidades")
-def listar_especialidades(user = Depends(get_current_user)):
+def listar_especialidades():
     """Keys de especialidades conocidas por el catálogo (ver
-    app/especialidades/config.py), para el selector del panel owner."""
+    app/especialidades/config.py). Público a propósito: lo usa tanto el
+    selector del panel owner como el formulario público de /registro."""
     return list(CAMPOS_POR_ESPECIALIDAD.keys())
 
 

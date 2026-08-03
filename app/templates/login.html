@@ -84,6 +84,10 @@
 
         <div id="error" class="error"></div>
 
+        <div class="mt-3 small">
+            <a href="/registro" class="text-light">¿Sos médico y no tenés cuenta? Registrate acá</a>
+        </div>
+
     </div>
 
     <script>
@@ -102,7 +106,7 @@
         const data = await res.json();
 
         if (!res.ok) {
-            document.getElementById("error").innerText = "Credenciales incorrectas";
+            document.getElementById("error").innerText = data.detail || "Credenciales incorrectas";
             return;
         }
 
