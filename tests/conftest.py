@@ -12,10 +12,17 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.core.dependencies import get_db
+from app.core.limiter import limiter
 from app.core.security import hash_password
 from app.database import Base
 from app.main import app
 from app.models.usuario import Usuario
+
+# Los fixtures de abajo loguean varias veces por test; con el rate limit de
+# /login activo (5/minute en prod) la suite completa lo pisaría en segundos.
+# Los tests que sí quieren probar el límite lo reactivan puntualmente
+# (ver tests/test_seguridad.py) y lo dejan como estaba en el finally.
+limiter.enabled = False
 
 PASSWORD = "test1234"
 

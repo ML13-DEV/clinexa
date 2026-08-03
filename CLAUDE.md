@@ -165,9 +165,19 @@ especialidad sin declararlas una por una en el schema.
 - **Sin tests de UI automatizados**: la verificación en browser se hizo
   con Playwright ad hoc en cada sesión, no quedó como suite de regresión.
   Los 19 tests de pytest son solo de backend.
-- **Hardening de producción no abordado**: CORS, rate limiting, headers
-  de seguridad. Probablemente baja prioridad mientras sea un puñado de
-  médicos usando la app directamente, pero a tener en cuenta si crece.
+- **Reset de contraseña sin implementar**: si un médico se olvida la
+  contraseña, hoy no hay forma de recuperarla sin que el owner entre a la
+  base a mano. Falta decidir proveedor de envío de mail (no hay ninguna
+  integración hoy) antes de poder implementar el flujo de token +
+  confirmación.
+- **CORS y rate limiting sí abordados** (`app/main.py`,
+  `app/core/limiter.py`): `CORSMiddleware` restrictivo, con orígenes
+  leídos de `ALLOWED_ORIGINS` (sin nada seteado, ningún origen cruzado
+  entra — el frontend Jinja2 es same-origin y no lo necesita).
+  `POST /login` limitado a `LOGIN_RATE_LIMIT` (5/minute default) vía
+  slowapi, para frenar fuerza bruta de contraseña. Headers de seguridad
+  (HSTS, CSP, etc.) siguen sin abordar — baja prioridad mientras sea un
+  puñado de médicos usando la app directamente.
 - **Panel owner con alcance angosto a propósito**: no permite resetear
   contraseña ni cambiar username de un médico (solo
   especialidad/activo) — así se pidió, no es un olvido.

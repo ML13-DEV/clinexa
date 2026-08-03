@@ -3,7 +3,9 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.dependencies import get_db
+from app.core.limiter import limiter
 from app.core.security import verify_password, hash_password, crear_token
 from app.especialidades.config import CAMPOS_POR_ESPECIALIDAD
 from app.models.usuario import EstadoCuenta, RolUsuario, Usuario
@@ -25,7 +27,8 @@ def login_page(request: Request):
     return templates.TemplateResponse(request, "login.html", {})
 
 @router.post("/login")
-def login(user: LoginSchema, db: Session = Depends(get_db)):
+@limiter.limit(settings.login_rate_limit)
+def login(request: Request, user: LoginSchema, db: Session = Depends(get_db)):
 
     usuario = db.query(Usuario).filter_by(username=user.username).first()
 

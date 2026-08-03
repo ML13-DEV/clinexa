@@ -2,7 +2,13 @@ from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
+from app.core.config import settings
+from app.core.limiter import limiter
 from app.database import Base, engine
 
 # MODELOS
@@ -20,6 +26,21 @@ from app.routes import owner
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+# CORS: sin ALLOWED_ORIGINS seteada, ningún origen cruzado queda permitido
+# (el frontend Jinja2 es same-origin y no lo necesita). allow_credentials
+# en False porque la auth es JWT en localStorage/header, no cookies.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.allowed_origins_list,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 app.include_router(pacientes.router)
 app.include_router(turnos.router)

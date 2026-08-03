@@ -23,6 +23,22 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 60 * 24
 
+    # Lista separada por comas de orígenes permitidos para CORS (ej.
+    # "https://clinexa.onrender.com,https://clinexa.com.ar"). Vacío por
+    # default: sin nada configurado, no se permite ningún origen cruzado
+    # (el frontend server-rendered no lo necesita; los navegadores no
+    # exigen CORS para requests same-origin).
+    allowed_origins: str = ""
+
+    # Límite de intentos de POST /login por IP, formato de la librería
+    # `limits` (usada por slowapi). 5/minute: generoso para un error de
+    # tipeo humano, restrictivo para fuerza bruta contra bcrypt.
+    login_rate_limit: str = "5/minute"
+
+    @property
+    def allowed_origins_list(self) -> list[str]:
+        return [o.strip() for o in self.allowed_origins.split(",") if o.strip()]
+
 
 @lru_cache
 def get_settings() -> Settings:
