@@ -250,20 +250,25 @@
             });
 
             const restantes = pacientesActuales.length - pacientesMostrados;
-            if (restantes > 0) {
+            const hayMenosQueMostrar = pacientesMostrados > CANTIDAD_INICIAL_PACIENTES;
+            if (restantes > 0 || hayMenosQueMostrar) {
                 const item = document.createElement("li");
-                item.className = "list-group-item text-center";
+                item.className = "list-group-item text-center d-flex justify-content-center gap-3";
                 item.innerHTML = `
-                    <a href="#" onclick="mostrarMasPacientes(); return false;">
-                        Ver más pacientes (${restantes} más)
-                    </a>
+                    ${restantes > 0 ? `<a href="#" onclick="mostrarMasPacientes(); return false;">Ver más pacientes (${restantes} más)</a>` : ""}
+                    ${hayMenosQueMostrar ? `<a href="#" onclick="mostrarMenosPacientes(); return false;">Ver menos</a>` : ""}
                 `;
                 lista.appendChild(item);
             }
         }
 
         function mostrarMasPacientes() {
-            pacientesMostrados = pacientesActuales.length;
+            pacientesMostrados = Math.min(pacientesMostrados + CANTIDAD_INICIAL_PACIENTES, pacientesActuales.length);
+            renderizarListaPacientes();
+        }
+
+        function mostrarMenosPacientes() {
+            pacientesMostrados = Math.max(pacientesMostrados - CANTIDAD_INICIAL_PACIENTES, CANTIDAD_INICIAL_PACIENTES);
             renderizarListaPacientes();
         }
 
