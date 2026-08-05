@@ -1,8 +1,15 @@
 import os
 
+import dotenv
+
 # Tiene que pasar antes de cualquier import de `app.*`: app.core.config lee
 # DATABASE_URL al importarse, y sin esto los tests quedarían a merced de lo
-# que haya seteado en el sistema (ej. una DATABASE_URL de otro proyecto).
+# que haya seteado en el sistema (ej. una DATABASE_URL de otro proyecto) o,
+# peor, de un .env real con una DATABASE_URL de Supabase: config.py usa
+# load_dotenv(override=True) a propósito para ganarle a una env var de
+# sistema, pero eso mismo le ganaría a esta asignación si no neutralizamos
+# load_dotenv acá — un os.environ seteado antes no alcanza.
+dotenv.load_dotenv = lambda *args, **kwargs: False
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 
 import pytest
