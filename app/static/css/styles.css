@@ -506,20 +506,26 @@ textarea.form-control {
 
 /* =========================
    🎨 COLOR DE VALORES DE ANÁLISIS
-   (rangos normales a definir a futuro, ver colorearValor() en paciente.html)
+   (ver colorearValor() en paciente.html, GET /especialidades/analisis/rangos)
+
+   Especificidad: el selector de Bootstrap para celdas de .table
+   (.table > :not(caption) > * > *) es (0,0,1,1) y le gana a un simple
+   .valor-alto (0,0,1,0), dejando el color siempre en blanco. Calificar
+   con ".table td" sube a (0,0,2,1), por encima de Bootstrap sin
+   depender del orden de los <link> en el <head>.
 ========================= */
 
-.valor-alto {
+.table td.valor-alto {
     color: #ef4444;
     font-weight: 600;
 }
 
-.valor-bajo {
+.table td.valor-bajo {
     color: #3b82f6;
     font-weight: 600;
 }
 
-.valor-normal {
+.table td.valor-normal {
     color: #22c55e;
     font-weight: 600;
 }
