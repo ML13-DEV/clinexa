@@ -193,15 +193,25 @@
             window.location.href = "/login";
         }
 
+        const CANTIDAD_INICIAL_PACIENTES = 5;
+        let pacientesActuales = [];
+        let pacientesMostrados = CANTIDAD_INICIAL_PACIENTES;
+
         async function cargarPacientes(search = "") {
             const res = await fetch(`/pacientes?search=${search}`, {
                 headers: {
                     "Authorization": "Bearer " + localStorage.getItem("token")
                 }
             });
-            const data = await res.json();
+            pacientesActuales = await res.json();
+            pacientesMostrados = CANTIDAD_INICIAL_PACIENTES;
+            renderizarListaPacientes();
+        }
 
-            if (data.length === 0) {
+        function renderizarListaPacientes() {
+            const lista = document.getElementById("lista");
+
+            if (pacientesActuales.length === 0) {
                 lista.innerHTML = `
                     <li class="list-group-item text-center text-muted">
                         No se encontraron pacientes
@@ -209,16 +219,14 @@
                 `;
                 return;
             }
-
-            const lista = document.getElementById("lista");
             lista.innerHTML = "";
 
-            data.forEach(p => {
+            pacientesActuales.slice(0, pacientesMostrados).forEach(p => {
                 const item = document.createElement("li");
                 item.className = "list-group-item";
                 item.innerHTML = `
                     <div class="d-flex justify-content-between align-items-center">
-                        
+
                         <div onclick="verPaciente(${p.id})" style="cursor:pointer;">
                             <strong>${p.nombre} ${p.apellido}</strong><br>
                             <small>DNI: ${p.dni}</small>
@@ -238,6 +246,23 @@
 
                 lista.appendChild(item);
             });
+
+            const restantes = pacientesActuales.length - pacientesMostrados;
+            if (restantes > 0) {
+                const item = document.createElement("li");
+                item.className = "list-group-item text-center";
+                item.innerHTML = `
+                    <a href="#" onclick="mostrarMasPacientes(); return false;">
+                        Ver más pacientes (${restantes} más)
+                    </a>
+                `;
+                lista.appendChild(item);
+            }
+        }
+
+        function mostrarMasPacientes() {
+            pacientesMostrados = pacientesActuales.length;
+            renderizarListaPacientes();
         }
 
         document.getElementById("search").addEventListener("input", (e) => {
