@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, or_
@@ -11,7 +11,7 @@ from app.schemas.turnos import TurnoCreate
 
 from app.core.permissions import get_paciente_propio
 from app.core.dependencies import get_db, get_current_user, get_current_medico
-from app.core.timezone import hoy_consultorio
+from app.core.timezone import hoy_consultorio, ahora_consultorio
 
 router = APIRouter(
     dependencies=[Depends(get_current_medico)]
@@ -137,11 +137,13 @@ def eliminar_turno(
     return {"ok": True}
 
 # =========================
-# TURNOS RECIENTES
+# TURNOS RECIENTES (proximos turnos, mas cercanos primero)
 # =========================
 
 @router.get("/turnos/recientes")
 def obtener_turnos_recientes(
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=5, ge=1, le=50),
     db: Session = Depends(get_db),
     user = Depends(get_current_user)
 ):
@@ -149,9 +151,10 @@ def obtener_turnos_recientes(
     turnos = (
         db.query(Turno)
         .options(joinedload(Turno.paciente))
-        .filter(Turno.usuario_id == user["id"])
-        .order_by(Turno.fecha.desc())
-        .limit(10)
+        .filter(Turno.usuario_id == user["id"], Turno.fecha >= ahora_consultorio())
+        .order_by(Turno.fecha.asc())
+        .offset(skip)
+        .limit(limit)
         .all()
     )
 
