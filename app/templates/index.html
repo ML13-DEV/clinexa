@@ -45,7 +45,11 @@
         </div>
 
         <h3>📅 Turnos de hoy</h3>
-        <ul id="turnosHoy" class="list-group mb-4"></ul>
+        <ul id="turnosHoy" class="list-group mb-2"></ul>
+
+        <button class="btn btn-secondary mb-4 w-100 w-md-auto" onclick="verMasTurnosHoy()">
+            Ver más
+        </button>
 
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
             <h3>Pacientes</h3>
@@ -70,11 +74,16 @@
 
     <ul id="ultimosTurnos" class="list-group"></ul>
 
-    <button class="btn btn-secondary mt-2 w-100 w-md-auto" onclick="verMasTurnos()">
-        Ver más
-    </button>
+    <div class="d-flex gap-2 mt-2">
+        <button id="btnVerMenosTurnosRecientes" class="btn btn-secondary w-100 w-md-auto" style="display: none;" onclick="verMenosTurnosRecientes()">
+            Ver menos
+        </button>
+        <button id="btnVerMasTurnosRecientes" class="btn btn-secondary w-100 w-md-auto" style="display: none;" onclick="verMasTurnosRecientes()">
+            Ver más
+        </button>
+    </div>
 
-   <br> 
+   <br>
 
     <br>
     </div>
@@ -180,7 +189,10 @@
             window.location.href = "/login";
         }
 
-        let limiteTurnos = 5;      
+        let limiteTurnos = 5;
+
+        const TAMANO_PAGINA_TURNOS_RECIENTES = 5;
+        let paginaTurnosRecientes = 0;
 
         let filtroActual = "todos";
 
@@ -289,17 +301,28 @@
 
 
         async function cargarTurnosRecientes() {
-            const res = await fetch("/turnos/recientes", {
+            const skip = paginaTurnosRecientes * TAMANO_PAGINA_TURNOS_RECIENTES;
+            const res = await fetch(`/turnos/recientes?skip=${skip}&limit=${TAMANO_PAGINA_TURNOS_RECIENTES}`, {
                 headers: {
                     "Authorization": "Bearer " + localStorage.getItem("token")
                 }
             });
             const data = await res.json();
 
+            // El total puede ser multiplo exacto del tamaño de pagina: la
+            // ultima pagina "llena" no alcanza a saber que no hay una
+            // siguiente hasta pedirla. Si vino vacia, no quedarse mostrando
+            // una lista en blanco: volver a la pagina anterior.
+            if (data.length === 0 && paginaTurnosRecientes > 0) {
+                paginaTurnosRecientes--;
+                document.getElementById("btnVerMasTurnosRecientes").style.display = "none";
+                return;
+            }
+
             const lista = document.getElementById("ultimosTurnos");
             lista.innerHTML = "";
 
-            data.slice(0, limiteTurnos).forEach(t => {
+            data.forEach(t => {
                 const li = document.createElement("li");
                 const nombre = t.paciente
                     ? `${t.paciente.nombre} ${t.paciente.apellido}`
@@ -337,6 +360,25 @@
                 lista.appendChild(li);
             });
 
+            document.getElementById("btnVerMenosTurnosRecientes").style.display =
+                paginaTurnosRecientes > 0 ? "inline-block" : "none";
+
+            // Pagina llena -> puede haber mas. Pagina corta (o vacia) ->
+            // no hay forma de saberlo sin un COUNT aparte, asi que se
+            // asume que no hay mas y se oculta "Ver más".
+            document.getElementById("btnVerMasTurnosRecientes").style.display =
+                data.length === TAMANO_PAGINA_TURNOS_RECIENTES ? "inline-block" : "none";
+        }
+
+        function verMasTurnosRecientes() {
+            paginaTurnosRecientes++;
+            cargarTurnosRecientes();
+        }
+
+        function verMenosTurnosRecientes() {
+            if (paginaTurnosRecientes === 0) return;
+            paginaTurnosRecientes--;
+            cargarTurnosRecientes();
         }
 
 
@@ -607,11 +649,9 @@
             toast.show();
         }
 
-        function verMasTurnos() {
-            console.log("limite:", limiteTurnos);
+        function verMasTurnosHoy() {
             limiteTurnos += 5;
             cargarTurnosHoy();
-            cargarTurnosRecientes();
         }
 
         function tiempoRelativo(fecha) {
