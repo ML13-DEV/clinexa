@@ -137,7 +137,7 @@ def eliminar_turno(
     return {"ok": True}
 
 # =========================
-# TURNOS RECIENTES (proximos turnos, mas cercanos primero)
+# TURNOS RECIENTES (turnos ya pasados, el mas cercano a ahora primero)
 # =========================
 
 @router.get("/turnos/recientes")
@@ -151,8 +151,8 @@ def obtener_turnos_recientes(
     turnos = (
         db.query(Turno)
         .options(joinedload(Turno.paciente))
-        .filter(Turno.usuario_id == user["id"], Turno.fecha >= ahora_consultorio())
-        .order_by(Turno.fecha.asc())
+        .filter(Turno.usuario_id == user["id"], Turno.fecha <= ahora_consultorio())
+        .order_by(Turno.fecha.desc())
         .offset(skip)
         .limit(limit)
         .all()
