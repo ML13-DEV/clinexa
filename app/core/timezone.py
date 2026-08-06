@@ -13,3 +13,10 @@ ZONA_CONSULTORIO = ZoneInfo("America/Argentina/Buenos_Aires")
 
 def hoy_consultorio() -> date:
     return datetime.now(ZONA_CONSULTORIO).date()
+
+
+def ahora_consultorio() -> datetime:
+    """Naive, en hora de Buenos Aires (sin tzinfo) para comparar directo
+    contra columnas como Turno.fecha, que se guardan naive en esa misma
+    hora local."""
+    return datetime.now(ZONA_CONSULTORIO).replace(tzinfo=None)
