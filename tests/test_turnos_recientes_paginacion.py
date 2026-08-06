@@ -1,12 +1,14 @@
-"""GET /turnos/recientes: proximos turnos, mas cercanos primero.
+"""GET /turnos/recientes: turnos ya pasados, el mas cercano a ahora primero.
 
 Cubre dos cosas:
 - skip/limit reales (antes tenia un .limit(10) fijo en el backend, asi
   que nunca se podia ver mas alla del turno 10 sin importar cuanto se
   clickeara "ver mas" en el frontend).
-- El filtro/orden nuevo: fecha >= ahora, ASC (antes era fecha.desc() sin
-  filtro, que con turnos cargados a futuro mostraba primero el mas
-  lejano en el tiempo, no el mas proximo)."""
+- El filtro/orden: fecha <= ahora, DESC. "Recientes" son los que ya
+  pasaron (ej. si son las 17:30 y el ultimo turno atendido fue a las
+  17:00, ese va primero) — no turnos futuros ni fecha.desc() sin filtro
+  (que antes mostraba primero el mas lejano en el futuro con turnos
+  cargados a futuro)."""
 
 from datetime import datetime, timedelta
 
@@ -34,7 +36,7 @@ def _crear_turno(client, token, fecha, motivo="Control"):
 def test_limit_por_defecto_es_5(client, crear_medico):
     _, token = crear_medico("dr_turnos1", "hematologia")
     for i in range(8):
-        _crear_turno(client, token, _fecha_futura(i + 1))
+        _crear_turno(client, token, _fecha_pasada(i + 1))
 
     res = client.get("/turnos/recientes", headers=auth_headers(token))
     assert res.status_code == 200, res.text
@@ -44,7 +46,7 @@ def test_limit_por_defecto_es_5(client, crear_medico):
 def test_skip_permite_ver_mas_alla_del_decimo_turno(client, crear_medico):
     _, token = crear_medico("dr_turnos2", "hematologia")
     for i in range(15):
-        _crear_turno(client, token, _fecha_futura(i + 1))
+        _crear_turno(client, token, _fecha_pasada(i + 1))
 
     # Antes del fix, ningun skip/limit exponia el turno 11+ porque el
     # backend cortaba en 10 sin importar lo que pidiera el cliente.
@@ -58,7 +60,7 @@ def test_skip_permite_ver_mas_alla_del_decimo_turno(client, crear_medico):
 def test_paginas_no_se_solapan(client, crear_medico):
     _, token = crear_medico("dr_turnos3", "hematologia")
     for i in range(10):
-        _crear_turno(client, token, _fecha_futura(i + 1))
+        _crear_turno(client, token, _fecha_pasada(i + 1))
 
     pagina1 = client.get(
         "/turnos/recientes", params={"skip": 0, "limit": 5}, headers=auth_headers(token)
@@ -77,51 +79,35 @@ def test_aislamiento_multitenant(client, crear_medico):
     _, token_b = crear_medico("dr_turnos4b", "hematologia")
 
     for i in range(3):
-        _crear_turno(client, token_a, _fecha_futura(i + 1))
+        _crear_turno(client, token_a, _fecha_pasada(i + 1))
 
     res = client.get("/turnos/recientes", headers=auth_headers(token_b))
     assert res.status_code == 200, res.text
     assert res.json() == []
 
 
-def test_orden_ascendente_el_mas_proximo_primero(client, crear_medico):
+def test_orden_descendente_el_mas_reciente_primero(client, crear_medico):
     _, token = crear_medico("dr_turnos5", "hematologia")
 
     # Los creo fuera de orden a proposito: el orden en la respuesta tiene
-    # que salir de ORDER BY fecha ASC, no del orden de insercion.
-    lejano = _crear_turno(client, token, _fecha_futura(20))
-    cercano = _crear_turno(client, token, _fecha_futura(1))
-    medio = _crear_turno(client, token, _fecha_futura(5))
+    # que salir de ORDER BY fecha DESC, no del orden de insercion.
+    viejo = _crear_turno(client, token, _fecha_pasada(20))
+    reciente = _crear_turno(client, token, _fecha_pasada(1))
+    medio = _crear_turno(client, token, _fecha_pasada(5))
 
     res = client.get("/turnos/recientes", headers=auth_headers(token))
     assert res.status_code == 200, res.text
     ids = [t["id"] for t in res.json()]
-    assert ids == [cercano["id"], medio["id"], lejano["id"]]
+    assert ids == [reciente["id"], medio["id"], viejo["id"]]
 
 
-def test_turnos_pasados_no_aparecen(client, db_session, crear_medico):
-    from app.models.turnos import Turno
+def test_turnos_futuros_no_aparecen(client, crear_medico):
+    _, token = crear_medico("dr_turnos6", "hematologia")
 
-    medico, token = crear_medico("dr_turnos6", "hematologia")
-
-    turno_futuro = _crear_turno(client, token, _fecha_futura(2))
-
-    # POST /turnos siempre valida contra el reloj actual del lado del
-    # frontend, asi que un turno con fecha pasada se inserta directo por
-    # la sesion de test.
-    db_session.add(
-        Turno(
-            usuario_id=medico.id,
-            nombre_temp="Paciente viejo",
-            fecha=datetime.strptime(_fecha_pasada(3), "%Y-%m-%dT%H:%M:%S"),
-            motivo="Control",
-            estado="atendido",
-        )
-    )
-    db_session.commit()
+    turno_pasado = _crear_turno(client, token, _fecha_pasada(1))
+    _crear_turno(client, token, _fecha_futura(2))
 
     res = client.get("/turnos/recientes", headers=auth_headers(token))
     assert res.status_code == 200, res.text
     ids = [t["id"] for t in res.json()]
-    assert ids == [turno_futuro["id"]]
-
+    assert ids == [turno_pasado["id"]]
